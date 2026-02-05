@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@layer base {
+  * {
+    @apply m-0 p-0 box-border;
+  }
+
+  body {
+    font-family: 'Inter', 'Poppins', 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    @apply bg-[#F6F0D7] text-[#89986D];
+  }
+}
+
+@layer components {
+  .app {
+    @apply flex flex-col h-screen bg-[#F6F0D7];
+  }
+
+  .app-container {
+    @apply flex flex-1 overflow-hidden;
+  }
+
+  .main-content {
+    @apply flex-1 overflow-y-auto p-6 bg-[#F6F0D7];
+  }
+
+  #root {
+    @apply max-w-5xl mx-auto p-8 text-center;
+  }
+
+  .logo {
+    @apply h-24 p-6 transition-all duration-300;
+  }
+
+  .logo:hover {
+    filter: drop-shadow(0 0 2em rgba(156, 171, 132, 0.4));
+  }
+
+  .logo.react:hover {
+    filter: drop-shadow(0 0 2em rgba(137, 152, 109, 0.4));
+  }
+
+  @keyframes logo-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    a:nth-of-type(2) .logo {
+      animation: logo-spin infinite 20s linear;
+    }
+  }
+
+  .card {
+    @apply p-8 bg-[#C5D89D] rounded-[16px] border border-[#9CAB84] shadow-[0_2px_8px_rgba(0,0,0,0.08)];
+  }
+
+  .read-the-docs {
+    @apply text-[#89986D];
+  }
+}
