@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import VideoCard from "../components/VideoCard";
 
 const API = import.meta.env.VITE_API_BASE_URL;
@@ -6,20 +7,23 @@ const API = import.meta.env.VITE_API_BASE_URL;
 const HomePage = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("All");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchVideos = async () => {
       try {
         setLoading(true);
 
-        const response = await fetch(
-          `${API}/videos`,
-          {
-            method: "GET",
-            credentials: "include",
-          }
-        );
+        const response = await fetch(`${API}/videos`, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        // ✅ Redirect if not logged in
+        if (response.status === 401) {
+          navigate("/login");
+          return;
+        }
 
         if (!response.ok) {
           const text = await response.text();
@@ -36,25 +40,13 @@ const HomePage = () => {
     };
 
     fetchVideos();
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="pt-4">
-
-      {/* ===== VIDEOS GRID ===== */}
       <div className="px-6 py-4 max-w-[1600px] mx-auto">
-
         {loading ? (
-          <div
-            className="
-              grid gap-6
-              grid-cols-1
-              sm:grid-cols-2
-              md:grid-cols-3
-              lg:grid-cols-4
-              xl:grid-cols-5
-            "
-          >
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {Array.from({ length: 12 }).map((_, i) => (
               <div key={i} className="animate-pulse">
                 <div className="aspect-video bg-gray-300 rounded-xl" />
@@ -64,15 +56,7 @@ const HomePage = () => {
             ))}
           </div>
         ) : videos.length > 0 ? (
-          <div
-            className="
-    grid gap-6
-    grid-cols-1
-    sm:grid-cols-2
-    md:grid-cols-4
-    [grid-template-columns:repeat(4,minmax(0,1fr))]
-  "
-          >
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
             {videos.map((video) => (
               <VideoCard key={video._id} video={video} />
             ))}
