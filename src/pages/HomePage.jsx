@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import VideoCard from "../components/VideoCard";
 
+const API = import.meta.env.VITE_API_BASE_URL;
+
 const HomePage = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -12,7 +14,7 @@ const HomePage = () => {
         setLoading(true);
 
         const response = await fetch(
-          "http://localhost:8000/api/v1/videos",
+          `${API}/videos`,
           {
             method: "GET",
             credentials: "include",
