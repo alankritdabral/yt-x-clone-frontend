@@ -3,7 +3,7 @@ import { Menu, Search, Bell, Video, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = import.meta.env.FRONTEND_URL;
 
 const Navbar = ({ sidebarOpen, setSidebarOpen, user }) => {
   const navigate = useNavigate();

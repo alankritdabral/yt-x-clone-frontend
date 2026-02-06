@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-const API = "http://localhost:8000/api/v1";
+const API = import.meta.env.VITE_API_BASE_URL;
 
 const VideoPage = () => {
   const { videoId } = useParams();

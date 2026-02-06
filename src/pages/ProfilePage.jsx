@@ -1,38 +1,46 @@
 import { useState, useEffect } from "react";
-import VideoCard from "../components/VideoCard"; // adjust path if needed
+import VideoCard from "../components/VideoCard";
 
-const tabs = ["Home", "Videos", "Playlists", "About"];
+const tabs = ["Home", "Videos", "History", "Playlists", "About"];
+
+const API = import.meta.env.VITE_API_BASE_URL;
 
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("Home");
   const [user, setUser] = useState(null);
   const [videos, setVideos] = useState([]);
+  const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch current user
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subLoading, setSubLoading] = useState(false);
+
+  /* ======================
+     Fetch current user
+  ====================== */
   const fetchUser = async () => {
     try {
-      const res = await fetch(
-        "http://localhost:8000/api/v1/users/current-user",
-        { credentials: "include" }
-      );
+      const res = await fetch(`${API}/users/current-user`, {
+        credentials: "include",
+      });
 
       const result = await res.json();
       setUser(result.data);
 
-      return result.data; // return user for next step
+      return result.data;
     } catch (err) {
-      console.error("User fetch error:", err);
+      console.error(err);
     }
   };
 
-  // Fetch videos of current user
+  /* ======================
+     Fetch user videos
+  ====================== */
   const fetchVideos = async (userId) => {
     try {
-      const res = await fetch(
-        "http://localhost:8000/api/v1/videos",
-        { credentials: "include" }
-      );
+      const res = await fetch(`${API}/videos`, {
+        credentials: "include",
+      });
 
       const result = await res.json();
       const allVideos = result.data.videos || [];
@@ -43,16 +51,63 @@ const ProfilePage = () => {
 
       setVideos(myVideos);
     } catch (err) {
-      console.error("Videos fetch error:", err);
+      console.error(err);
     }
   };
 
+  /* ======================
+     Fetch watch history
+  ====================== */
+  const fetchHistory = async () => {
+    try {
+      const res = await fetch(`${API}/users/history`, {
+        credentials: "include",
+      });
+
+      const result = await res.json();
+      setHistory(result.data || []);
+    } catch (err) {
+      console.error("History fetch error:", err);
+    }
+  };
+
+  /* ======================
+     Subscribe toggle
+  ====================== */
+  const toggleSubscribe = async () => {
+    if (!user?._id) return;
+
+    try {
+      setSubLoading(true);
+
+      await fetch(
+        `${API}/subscriptions/toggle/${user._id}`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
+
+      setIsSubscribed((prev) => !prev);
+    } catch (err) {
+      console.error("Subscription error:", err);
+    } finally {
+      setSubLoading(false);
+    }
+  };
+
+  /* ======================
+     Load initial data
+  ====================== */
   useEffect(() => {
     const loadData = async () => {
       const userData = await fetchUser();
+
       if (userData?._id) {
         await fetchVideos(userData._id);
+        await fetchHistory();
       }
+
       setLoading(false);
     };
 
@@ -93,8 +148,21 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          <button className="bg-black text-white px-6 py-2 rounded-full hover:bg-gray-900 w-fit">
-            Subscribe
+          {/* Subscribe Button */}
+          <button
+            onClick={toggleSubscribe}
+            disabled={subLoading}
+            className={`px-6 py-2 rounded-full w-fit text-white ${
+              isSubscribed
+                ? "bg-gray-600 hover:bg-gray-700"
+                : "bg-black hover:bg-gray-900"
+            }`}
+          >
+            {subLoading
+              ? "Loading..."
+              : isSubscribed
+              ? "Subscribed"
+              : "Subscribe"}
           </button>
         </div>
 
@@ -104,10 +172,11 @@ const ProfilePage = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-3 ${activeTab === tab
+              className={`pb-3 ${
+                activeTab === tab
                   ? "border-b-2 border-black text-black"
                   : "text-gray-500 hover:text-black"
-                }`}
+              }`}
             >
               {tab}
             </button>
@@ -118,15 +187,23 @@ const ProfilePage = () => {
         <div className="py-6">
           {(activeTab === "Home" ||
             activeTab === "Videos") && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {videos.map((video) => (
+                <VideoCard key={video._id} video={video} />
+              ))}
+            </div>
+          )}
 
+          {/* History Tab */}
+          {activeTab === "History" && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {history.map((video) => (
+                <VideoCard key={video._id} video={video} />
+              ))}
+            </div>
+          )}
 
-                {videos.map((video) => (
-                  <VideoCard key={video._id} video={video} />
-                ))}
-              </div>
-            )}
-
+          {/* About */}
           {activeTab === "About" && (
             <div className="max-w-xl text-sm text-gray-700 space-y-2">
               <p>Email: {user?.email}</p>

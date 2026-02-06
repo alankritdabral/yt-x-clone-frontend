@@ -129,7 +129,7 @@ const UploadPage = () => {
     const xhr = new XMLHttpRequest();
     xhrRef.current = xhr;
 
-    xhr.open("POST", "http://localhost:8000/api/v1/videos/");
+    xhr.open("POST", import.meta.env.VITE_API_BASE_URL + "/videos/upload");
 
     // send cookies if using auth
     xhr.withCredentials = true;

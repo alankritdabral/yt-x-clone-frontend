@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import VideoCard from "../components/VideoCard";
 
-const API = "http://localhost:8000/api/v1/playlist";
+const API = import.meta.env.VITE_API_BASE_URL + "/playlists";
 
 const PlaylistPage = () => {
   const [playlists, setPlaylists] = useState([]);

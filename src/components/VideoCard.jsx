@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-const API = "http://localhost:8000/api/v1";
+const API = import.meta.env.VITE_API_BASE_URL;
 
 const VideoCard = ({ video }) => {
   const navigate = useNavigate();
