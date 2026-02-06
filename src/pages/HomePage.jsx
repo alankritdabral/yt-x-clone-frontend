@@ -19,12 +19,6 @@ const HomePage = () => {
           credentials: "include",
         });
 
-        // ✅ Redirect if not logged in
-        if (response.status === 401) {
-          navigate("/login");
-          return;
-        }
-
         if (!response.ok) {
           const text = await response.text();
           throw new Error(text);
@@ -33,6 +27,8 @@ const HomePage = () => {
         const data = await response.json();
         setVideos(data.data.videos);
       } catch (error) {
+        // ✅ Redirect if not logged in
+        navigate("/login");
         console.error("Error fetching videos:", error.message);
       } finally {
         setLoading(false);
