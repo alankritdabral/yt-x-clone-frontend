@@ -1,21 +1,13 @@
-// Subscription API calls
-import apiClient from './axiosClient'
+const API = import.meta.env.VITE_API_BASE_URL;
 
-const subscriptionAPI = {
-  // TODO: Toggle subscription to channel
-  toggleSubscription: (channelId) => apiClient.post(`/subscriptions/c/${channelId}`),
+export const toggleSubscription = async (channelId) => {
+  const res = await fetch(
+    `${API}/subscriptions/toggle/${channelId}`,
+    {
+      method: "POST",
+      credentials: "include",
+    }
+  );
 
-  // TODO: Get channel subscribers count
-  getChannelSubscribers: (channelId) => apiClient.get(`/subscriptions/c/${channelId}`),
-
-  // TODO: Get user subscriptions
-  getUserSubscriptions: (userId) => apiClient.get(`/subscriptions/u/${userId}`),
-
-  // TODO: Get subscribed channels list
-  getSubscribedChannels: (params) => apiClient.get('/subscriptions', { params }),
-
-  // TODO: Check if subscribed to channel
-  isSubscribed: (channelId) => apiClient.get(`/subscriptions/c/${channelId}/status`),
-}
-
-export default subscriptionAPI
+  if (!res.ok) throw new Error("Subscription failed");
+};

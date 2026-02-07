@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { uploadVideo } from "../api/videoAPI";
 
 const UploadPage = () => {
   const [formData, setFormData] = useState({
@@ -126,52 +127,22 @@ const UploadPage = () => {
       if (v !== null) data.append(k, v);
     });
 
-    const xhr = new XMLHttpRequest();
-    xhrRef.current = xhr;
+    setUploading(true);
 
-    xhr.open("POST", import.meta.env.VITE_API_BASE_URL + "/videos/upload");
-
-    // send cookies if using auth
-    xhr.withCredentials = true;
-
-    const startTime = Date.now();
-
-    xhr.upload.onprogress = (e) => {
-      if (!e.lengthComputable) return;
-
-      const percent = Math.round((e.loaded * 100) / e.total);
-      setUploadProgress(percent);
-
-      const seconds = (Date.now() - startTime) / 1000;
-      const speed = (e.loaded / 1024 / 1024 / seconds).toFixed(2);
-      console.log(`${speed} MB/s`);
-    };
-
-    xhr.onload = () => {
-      setUploading(false);
-
-      if (xhr.status === 201) {
+    uploadVideo({
+      formData: data,
+      xhrRef,
+      onProgress: setUploadProgress,
+      onSuccess: () => {
+        setUploading(false);
         alert("Upload successful!");
         resetForm();
-        // todo send to vido player
-      } else {
+      },
+      onError: () => {
+        setUploading(false);
         alert("Upload failed");
-      }
-    };
-
-    xhr.onerror = () => {
-      setUploading(false);
-      alert("Upload error");
-    };
-
-    setUploading(true);
-    xhr.send(data);
-  };
-
-  const cancelUpload = () => {
-    xhrRef.current?.abort();
-    setUploading(false);
-    setUploadProgress(0);
+      },
+    });
   };
 
   // ---------------- UI ----------------

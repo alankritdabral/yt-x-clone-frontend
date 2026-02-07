@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { registerUser } from "../api/userAPI";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -35,17 +36,13 @@ const RegisterPage = () => {
 
     setError("");
 
-    if (!avatar) {
-      return setError("Avatar is required");
-    }
+    if (!avatar) return setError("Avatar is required");
 
-    if (formData.password !== formData.confirmPassword) {
+    if (formData.password !== formData.confirmPassword)
       return setError("Passwords do not match");
-    }
 
-    if (!formData.agreeToTerms) {
+    if (!formData.agreeToTerms)
       return setError("Please agree to terms");
-    }
 
     try {
       setLoading(true);
@@ -57,23 +54,9 @@ const RegisterPage = () => {
       data.append("password", formData.password);
       data.append("avatar", avatar);
 
-      if (coverImage) {
-        data.append("coverImage", coverImage);
-      }
+      if (coverImage) data.append("coverImage", coverImage);
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/users/register`,
-        {
-          method: "POST",
-          body: data,
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Registration failed");
-      }
+      await registerUser(data);
 
       alert("Account created successfully!");
       navigate("/login");
@@ -83,6 +66,7 @@ const RegisterPage = () => {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="h-screen overflow-hidden flex items-center justify-center bg-[#F6F0D7] px-4">

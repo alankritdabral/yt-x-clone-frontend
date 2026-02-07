@@ -1,21 +1,15 @@
 import { useEffect, useState } from "react";
 import VideoCard from "../components/VideoCard";
-
-const API = import.meta.env.VITE_API_BASE_URL;
+import { fetchLikedVideos } from "../api/videoAPI";
 
 const LikedVideos = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  /* -------- Fetch Liked Videos -------- */
   useEffect(() => {
-    const fetchLikedVideos = async () => {
+    const loadLikedVideos = async () => {
       try {
-        const res = await fetch(`${API}/likes/videos`, {
-          credentials: "include",
-        });
-
-        const data = await res.json();
+        const data = await fetchLikedVideos();
         setVideos(data.data || []);
       } catch (err) {
         console.error(err);
@@ -24,7 +18,7 @@ const LikedVideos = () => {
       }
     };
 
-    fetchLikedVideos();
+    loadLikedVideos();
   }, []);
 
   if (loading) {

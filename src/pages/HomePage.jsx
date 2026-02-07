@@ -1,33 +1,20 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import VideoCard from "../components/VideoCard";
+import { fetchVideos } from "../api/videoAPI";
 
-const API = import.meta.env.VITE_API_BASE_URL;
- 
 const HomePage = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchVideos = async () => {
+    const loadVideos = async () => {
       try {
         setLoading(true);
-
-        const response = await fetch(`${API}/videos`, {
-          method: "GET",
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          const text = await response.text();
-          throw new Error(text);
-        }
-
-        const data = await response.json();
+        const data = await fetchVideos();
         setVideos(data.data.videos);
       } catch (error) {
-        // ✅ Redirect if not logged in
         navigate("/login");
         console.error("Error fetching videos:", error.message);
       } finally {
@@ -35,7 +22,7 @@ const HomePage = () => {
       }
     };
 
-    fetchVideos();
+    loadVideos();
   }, [navigate]);
 
   return (

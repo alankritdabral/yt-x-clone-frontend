@@ -1,5 +1,16 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import {
+  fetchVideo,
+  registerView,
+  toggleVideoLike,
+} from "../api/videoAPI";
+
+import {
+  fetchComments,
+  createComment,
+  removeComment,
+} from "../api/commentAPI";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
@@ -26,12 +37,7 @@ const VideoPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const videoRes = await fetch(`${API}/videos/${videoId}`, {
-          credentials: "include",
-        });
-
-        const videoData = await videoRes.json();
-        const videoInfo = videoData.data;
+        const videoInfo = await fetchVideo(videoId);
 
         setVideo(videoInfo);
         setLikesCount(videoInfo?.likesCount || 0);
@@ -50,25 +56,16 @@ const VideoPage = () => {
         }
 
         /* Comments */
-        const commentRes = await fetch(`${API}/comments/${videoId}`, {
-          credentials: "include",
-        });
-
-        const commentData = await commentRes.json();
-        setComments(commentData.data?.comments || []);
+        setComments(await fetchComments(videoId));
 
         /* History */
         await fetch(`${API}/users/history/${videoId}`, {
           method: "POST",
           credentials: "include",
         });
-        // View Count
-        if (!videoId) return;
 
-        fetch(`${API}/videos/view/${videoId}`, {
-          method: "POST",
-          credentials: "include",
-        });
+        /* Register view */
+        registerView(videoId);
 
       } catch (err) {
         console.error(err);
@@ -117,14 +114,9 @@ const VideoPage = () => {
     setLikesCount((c) => (prev ? Math.max(c - 1, 0) : c + 1));
 
     try {
-      const res = await fetch(
-        `${API}/likes/toggle/v/${videoId}`,
-        { method: "POST", credentials: "include" }
-      );
-
-      const data = await res.json();
-      setLiked(data.data.liked);
-      setLikesCount(data.data.likesCount);
+      const data = await toggleVideoLike(videoId);
+      setLiked(data.liked);
+      setLikesCount(data.likesCount);
     } catch {
       setLiked(prev);
     }
@@ -155,26 +147,14 @@ const VideoPage = () => {
   const addComment = async () => {
     if (!newComment.trim()) return;
 
-    const res = await fetch(`${API}/comments/${videoId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ content: newComment }),
-    });
-
-    const data = await res.json();
-
-    setComments((prev) => [data.data, ...prev]);
+    const comment = await createComment(videoId, newComment);
+    setComments((prev) => [comment, ...prev]);
     setNewComment("");
   };
 
   /* ---------------- Delete Comment ---------------- */
   const deleteComment = async (id) => {
-    await fetch(`${API}/comments/c/${id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-
+    await removeComment(id);
     setComments((prev) => prev.filter((c) => c._id !== id));
   };
 
@@ -209,7 +189,6 @@ const VideoPage = () => {
 
   return (
     <div className="max-w-5xl mx-auto px-4 mt-4">
-      {/* Video */}
       <video
         src={videoUrl}
         controls
@@ -217,12 +196,11 @@ const VideoPage = () => {
         className="w-full rounded-xl bg-black"
       />
 
-      {/* Title */}
       <h1 className="text-xl font-semibold mt-4">
         {video.title}
       </h1>
 
-      {/* Channel + Actions */}
+      {/* Channel */}
       <div className="flex justify-between items-center mt-3">
         <div className="flex items-center gap-3">
           <img
@@ -268,12 +246,12 @@ const VideoPage = () => {
 
       {/* Description */}
       <div className="bg-gray-100 rounded-xl p-4 mt-4">
-        <p className="font-semibold text-sm mb-2 text-left">
+        <p className="font-semibold text-sm mb-2">
           {(video.views || 0).toLocaleString()} views •{" "}
           {new Date(video.createdAt).toLocaleDateString()}
         </p>
 
-        <p className="whitespace-pre-line text-left">
+        <p className="whitespace-pre-line">
           {showFullDesc
             ? video.description
             : video.description?.slice(0, 150)}
@@ -289,7 +267,7 @@ const VideoPage = () => {
         )}
       </div>
 
-      {/* Add Comment */}
+      {/* Comment Input */}
       <div className="mt-6 flex gap-3">
         <input
           value={newComment}
@@ -310,16 +288,13 @@ const VideoPage = () => {
         {comments.map((c) => (
           <div key={c._id} className="flex gap-3">
             <img
-              src={
-                c.owner?.avatar ||
-                "https://via.placeholder.com/40"
-              }
+              src={c.owner?.avatar}
               className="w-10 h-10 rounded-full"
               alt=""
             />
 
-            <div className="flex-1 text-left">
-              <p className="font-semibold ">
+            <div className="flex-1">
+              <p className="font-semibold">
                 {c.owner?.username}
               </p>
 

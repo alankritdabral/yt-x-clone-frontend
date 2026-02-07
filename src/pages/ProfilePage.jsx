@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
 import VideoCard from "../components/VideoCard";
+import {
+  fetchCurrentUser,
+  fetchWatchHistory,
+} from "../api/userAPI";
+import { fetchVideosByOwner } from "../api/videoAPI";
+import { toggleSubscription } from "../api/subscriptionAPI";
 
 const tabs = ["Home", "Videos", "History", "Playlists", "About"];
-
-const API = import.meta.env.VITE_API_BASE_URL;
 
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("Home");
@@ -15,71 +19,12 @@ const ProfilePage = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subLoading, setSubLoading] = useState(false);
 
-  /* ======================
-     Fetch current user
-  ====================== */
-  const fetchUser = async () => {
-    try {
-      const res = await fetch(`${API}/users/current-user`, {
-        credentials: "include",
-      });
-
-      const result = await res.json();
-      setUser(result.data);
-
-      return result.data;
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  /* ======================
-     Fetch user videos
-  ====================== */
-  const fetchVideos = async (userId) => {
-    try {
-      const res = await fetch(`${API}/videos`, {
-        credentials: "include",
-      });
-
-      const result = await res.json();
-      const allVideos = result.data.videos || [];
-
-      const myVideos = allVideos.filter(
-        (v) => v.owner?._id === userId
-      );
-
-      setVideos(myVideos);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  /* ======================
-     Fetch watch history
-  ====================== */
-  const fetchHistory = async () => {
-    try {
-      const res = await fetch(`${API}/users/history`, {
-        credentials: "include",
-      });
-
-      const result = await res.json();
-      setHistory(result.data || []);
-    } catch (err) {
-      console.error("History fetch error:", err);
-    }
-  };
-
-  /* ======================
-     Subscribe toggle
-  ====================== */
   const toggleSubscribe = async () => {
     if (!user?._id) return;
-
+  
     try {
       setSubLoading(true);
-
+  
       await fetch(
         `${API}/subscriptions/toggle/${user._id}`,
         {
@@ -87,7 +32,7 @@ const ProfilePage = () => {
           credentials: "include",
         }
       );
-
+  
       setIsSubscribed((prev) => !prev);
     } catch (err) {
       console.error("Subscription error:", err);
@@ -95,24 +40,30 @@ const ProfilePage = () => {
       setSubLoading(false);
     }
   };
-
-  /* ======================
-     Load initial data
-  ====================== */
+  
   useEffect(() => {
     const loadData = async () => {
-      const userData = await fetchUser();
+      try {
+        const userData = await fetchCurrentUser();
+        setUser(userData);
 
-      if (userData?._id) {
-        await fetchVideos(userData._id);
-        await fetchHistory();
+        if (userData?._id) {
+          const vids = await fetchVideosByOwner(userData._id);
+          setVideos(vids);
+
+          const hist = await fetchWatchHistory();
+          setHistory(hist);
+        }
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     loadData();
   }, []);
+
+  if (loading) return <div className="p-10">Loading...</div>;
+
 
   if (loading) return <div className="p-10">Loading...</div>;
 
@@ -152,17 +103,16 @@ const ProfilePage = () => {
           <button
             onClick={toggleSubscribe}
             disabled={subLoading}
-            className={`px-6 py-2 rounded-full w-fit text-white ${
-              isSubscribed
+            className={`px-6 py-2 rounded-full w-fit text-white ${isSubscribed
                 ? "bg-gray-600 hover:bg-gray-700"
                 : "bg-black hover:bg-gray-900"
-            }`}
+              }`}
           >
             {subLoading
               ? "Loading..."
               : isSubscribed
-              ? "Subscribed"
-              : "Subscribe"}
+                ? "Subscribed"
+                : "Subscribe"}
           </button>
         </div>
 
@@ -172,11 +122,10 @@ const ProfilePage = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-3 ${
-                activeTab === tab
+              className={`pb-3 ${activeTab === tab
                   ? "border-b-2 border-black text-black"
                   : "text-gray-500 hover:text-black"
-              }`}
+                }`}
             >
               {tab}
             </button>
@@ -187,12 +136,12 @@ const ProfilePage = () => {
         <div className="py-6">
           {(activeTab === "Home" ||
             activeTab === "Videos") && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {videos.map((video) => (
-                <VideoCard key={video._id} video={video} />
-              ))}
-            </div>
-          )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {videos.map((video) => (
+                  <VideoCard key={video._id} video={video} />
+                ))}
+              </div>
+            )}
 
           {/* History Tab */}
           {activeTab === "History" && (

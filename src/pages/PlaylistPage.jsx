@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import VideoCard from "../components/VideoCard";
-
-const API = import.meta.env.VITE_API_BASE_URL + "/playlists";
+import {
+  fetchUserPlaylists,
+  fetchPlaylistDetails,
+  createPlaylist,
+  deletePlaylist,
+} from "../api/playlistAPI";
 
 const PlaylistPage = () => {
   const [playlists, setPlaylists] = useState([]);
@@ -10,28 +14,19 @@ const PlaylistPage = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
 
-  /* ===========================
-     Fetch Playlists
-  =========================== */
-  const fetchPlaylists = async () => {
+  /* ---------- Load Playlists ---------- */
+  const loadPlaylists = async () => {
     try {
       setLoading(true);
 
       const user = JSON.parse(localStorage.getItem("user"));
-
       if (!user?._id) return;
 
-      const res = await fetch(`${API}/user/${user._id}`, {
-        credentials: "include",
-      });
-
-      const data = await res.json();
-      const list = data.data || [];
-
+      const list = await fetchUserPlaylists(user._id);
       setPlaylists(list);
 
       if (list.length > 0) {
-        fetchPlaylistDetails(list[0]._id);
+        loadPlaylistDetails(list[0]._id);
       } else {
         setSelectedPlaylist(null);
       }
@@ -43,58 +38,39 @@ const PlaylistPage = () => {
   };
 
   useEffect(() => {
-    fetchPlaylists();
+    loadPlaylists();
   }, []);
 
-  /* ===========================
-     Playlist Details
-  =========================== */
-  const fetchPlaylistDetails = async (playlistId) => {
+  /* ---------- Playlist Details ---------- */
+  const loadPlaylistDetails = async (playlistId) => {
     try {
-      const res = await fetch(`${API}/${playlistId}`, {
-        credentials: "include",
-      });
-
-      const data = await res.json();
-      setSelectedPlaylist(data.data);
+      const data = await fetchPlaylistDetails(playlistId);
+      setSelectedPlaylist(data);
     } catch (err) {
       console.error(err);
     }
   };
 
-  /* ===========================
-     Create Playlist
-  =========================== */
+  /* ---------- Create Playlist ---------- */
   const handleCreatePlaylist = async () => {
     if (!newPlaylistName.trim()) return;
 
     try {
-      await fetch(API, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newPlaylistName }),
-      });
+      await createPlaylist(newPlaylistName);
 
       setNewPlaylistName("");
       setShowCreateForm(false);
-      fetchPlaylists();
+      loadPlaylists();
     } catch (err) {
       console.error(err);
     }
   };
 
-  /* ===========================
-     Delete Playlist
-  =========================== */
+  /* ---------- Delete Playlist ---------- */
   const handleDeletePlaylist = async (playlistId) => {
     try {
-      await fetch(`${API}/${playlistId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      fetchPlaylists();
+      await deletePlaylist(playlistId);
+      loadPlaylists();
     } catch (err) {
       console.error(err);
     }
@@ -102,7 +78,6 @@ const PlaylistPage = () => {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      {/* Header */}
       <div className="flex justify-between items-center px-6 py-4 border-b">
         <h1 className="text-2xl font-semibold">Playlists</h1>
 
@@ -114,7 +89,6 @@ const PlaylistPage = () => {
         </button>
       </div>
 
-      {/* Create Form */}
       {showCreateForm && (
         <div className="p-4 border-b flex gap-2">
           <input
@@ -141,16 +115,14 @@ const PlaylistPage = () => {
         </div>
       )}
 
-      {/* Body */}
       <div className="flex">
-        {/* Sidebar playlists */}
         <div className="w-72 border-r h-[calc(100vh-120px)] overflow-y-auto p-4">
           {loading && <p>Loading...</p>}
 
           {playlists.map((playlist) => (
             <div
               key={playlist._id}
-              onClick={() => fetchPlaylistDetails(playlist._id)}
+              onClick={() => loadPlaylistDetails(playlist._id)}
               className={`p-3 mb-2 rounded cursor-pointer hover:bg-gray-100 ${selectedPlaylist?._id === playlist._id
                   ? "bg-gray-200"
                   : ""
@@ -175,7 +147,6 @@ const PlaylistPage = () => {
           ))}
         </div>
 
-        {/* Playlist Videos */}
         <div className="flex-1 p-6">
           {selectedPlaylist ? (
             <>

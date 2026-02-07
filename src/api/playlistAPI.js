@@ -1,30 +1,47 @@
-// Playlist API calls
-import apiClient from './axiosClient'
+const API = import.meta.env.VITE_API_BASE_URL + "/playlists";
 
-const playlistAPI = {
-  // TODO: Get user playlists
-  getUserPlaylists: (userId) => apiClient.get(`/playlists/user/${userId}`),
+/* ---------- Get User Playlists ---------- */
+export const fetchUserPlaylists = async (userId) => {
+  const res = await fetch(`${API}/user/${userId}`, {
+    credentials: "include",
+  });
 
-  // TODO: Get playlist by ID
-  getPlaylistById: (playlistId) => apiClient.get(`/playlists/${playlistId}`),
+  if (!res.ok) throw new Error("Failed to fetch playlists");
 
-  // TODO: Create a new playlist
-  createPlaylist: (data) => apiClient.post('/playlists', data),
+  const data = await res.json();
+  return data.data || [];
+};
 
-  // TODO: Update playlist
-  updatePlaylist: (playlistId, data) => apiClient.patch(`/playlists/${playlistId}`, data),
+/* ---------- Playlist Details ---------- */
+export const fetchPlaylistDetails = async (playlistId) => {
+  const res = await fetch(`${API}/${playlistId}`, {
+    credentials: "include",
+  });
 
-  // TODO: Delete playlist
-  deletePlaylist: (playlistId) => apiClient.delete(`/playlists/${playlistId}`),
+  if (!res.ok) throw new Error("Failed playlist details");
 
-  // TODO: Add video to playlist
-  addVideoToPlaylist: (playlistId, videoId) => apiClient.patch(`/playlists/add/${videoId}/${playlistId}`),
+  const data = await res.json();
+  return data.data;
+};
 
-  // TODO: Remove video from playlist
-  removeVideoFromPlaylist: (playlistId, videoId) => apiClient.patch(`/playlists/remove/${videoId}/${playlistId}`),
+/* ---------- Create Playlist ---------- */
+export const createPlaylist = async (name) => {
+  const res = await fetch(API, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
 
-  // TODO: Get all playlists
-  getAllPlaylists: (params) => apiClient.get('/playlists', { params }),
-}
+  if (!res.ok) throw new Error("Failed to create playlist");
+};
 
-export default playlistAPI
+/* ---------- Delete Playlist ---------- */
+export const deletePlaylist = async (playlistId) => {
+  const res = await fetch(`${API}/${playlistId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  if (!res.ok) throw new Error("Failed to delete playlist");
+};

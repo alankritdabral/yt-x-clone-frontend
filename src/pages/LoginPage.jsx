@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { loginUser } from "../api/userAPI";
 
 const LoginPage = ({ setIsLoggedIn, setUser }) => {
   const navigate = useNavigate();
@@ -24,23 +25,7 @@ const LoginPage = ({ setIsLoggedIn, setUser }) => {
     try {
       setLoading(true);
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/users/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ email, password }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || "Login failed");
-      }
-
-      const data = await response.json();
-
+      const data = await loginUser(email, password);
 
       setIsLoggedIn(true);
       setUser(data.data.user);
@@ -48,7 +33,6 @@ const LoginPage = ({ setIsLoggedIn, setUser }) => {
       localStorage.setItem("user", JSON.stringify(data.data.user));
 
       navigate("/");
-
     } catch (err) {
       setError(err.message || "Something went wrong");
     } finally {

@@ -1,22 +1,16 @@
 import { useEffect, useState } from "react";
 import VideoCard from "../components/VideoCard";
-
-const API = import.meta.env.VITE_API_BASE_URL;
+import { fetchWatchHistory } from "../api/userAPI";
 
 const WatchHistory = () => {
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchHistory = async () => {
+        const loadHistory = async () => {
             try {
-                const res = await fetch(
-                    `${API}/users/history`,
-                    { credentials: "include" }
-                );
-
-                const data = await res.json();
-                setHistory(data.data || []);
+                const data = await fetchWatchHistory();
+                setHistory(data);
             } catch (err) {
                 console.error(err);
             } finally {
@@ -24,7 +18,7 @@ const WatchHistory = () => {
             }
         };
 
-        fetchHistory();
+        loadHistory();
     }, []);
 
     if (loading)
@@ -41,10 +35,12 @@ const WatchHistory = () => {
                     No watch history yet.
                 </p>
             ) : (
-                <div className="grid gap-6
-                        sm:grid-cols-2
-                        md:grid-cols-3
-                        lg:grid-cols-4">
+                <div
+                    className="grid gap-6
+            sm:grid-cols-2
+            md:grid-cols-3
+            lg:grid-cols-4"
+                >
                     {history.map((video) => (
                         <VideoCard key={video._id} video={video} />
                     ))}

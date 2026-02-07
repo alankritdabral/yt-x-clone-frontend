@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import VideoCard from "../components/VideoCard";
-
-const API = import.meta.env.VITE_API_BASE_URL + "/search";
+import { searchContent } from "../api/searchApi";
 
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -14,9 +13,6 @@ const SearchPage = () => {
   const [loading, setLoading] = useState(false);
   const [filterType, setFilterType] = useState("video");
 
-  /* ===============================
-     Perform Search
-  =============================== */
   useEffect(() => {
     if (!searchQuery.trim()) {
       setResults([]);
@@ -27,23 +23,20 @@ const SearchPage = () => {
       try {
         setLoading(true);
 
-        // update URL
         setSearchParams({ q: searchQuery });
 
-        const response = await fetch(
-          `${API}/search?q=${searchQuery}&type=${filterType}`
+        const data = await searchContent(
+          searchQuery,
+          filterType
         );
 
-        const data = await response.json();
-
-        // API returns data.data
-        setResults(data?.data || []);
+        setResults(data);
       } catch (error) {
         console.error("Search error:", error);
       } finally {
         setLoading(false);
       }
-    }, 400); // debounce
+    }, 400);
 
     return () => clearTimeout(timer);
   }, [searchQuery, filterType, setSearchParams]);

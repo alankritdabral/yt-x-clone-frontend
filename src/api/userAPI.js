@@ -1,50 +1,72 @@
-// User API calls
-import apiClient from './axiosClient'
+const API = import.meta.env.VITE_API_BASE_URL;
 
-const userAPI = {
-  // TODO: Register a new user
-  register: (data) => apiClient.post('/users/register', data),
+/* -------- Login User -------- */
+export const loginUser = async (email, password) => {
+  const response = await fetch(`${API}/users/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ email, password }),
+  });
 
-  // TODO: Login user
-  login: (data) => apiClient.post('/users/login', data),
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.message || "Login failed");
+  }
 
-  // TODO: Logout user
-  logout: () => apiClient.post('/users/logout'),
+  return response.json();
+};
 
-  // TODO: Get current user profile
-  getCurrentUser: () => apiClient.get('/users/current-user'),
+/* ---------- Register ---------- */
+export const registerUser = async (formData) => {
+  const response = await fetch(`${API}/users/register`, {
+    method: "POST",
+    body: formData,
+  });
 
-  // TODO: Get user by ID
-  getUserById: (userId) => apiClient.get(`/users/c/${userId}`),
+  const result = await response.json();
 
-  // TODO: Update user profile
-  updateProfile: (data) => apiClient.patch('/users/account', data),
+  if (!response.ok) {
+    throw new Error(result.message || "Registration failed");
+  }
 
-  // TODO: Update user avatar
-  updateAvatar: (formData) => apiClient.patch('/users/avatar', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  }),
+  return result;
+};
 
-  // TODO: Update user cover image
-  updateCoverImage: (formData) => apiClient.patch('/users/cover-image', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  }),
+/* ---------- Current User ---------- */
+export const fetchCurrentUser = async () => {
+  const res = await fetch(`${API}/users/current-user`, {
+    credentials: "include",
+  });
 
-  // TODO: Change user password
-  changePassword: (data) => apiClient.post('/users/change-password', data),
+  if (!res.ok) throw new Error("Failed to fetch user");
 
-  // TODO: Refresh access token
-  refreshToken: () => apiClient.post('/users/refresh-token'),
+  const data = await res.json();
+  return data.data;
+};
 
-  // TODO: Get user watch history
-  getWatchHistory: () => apiClient.get('/users/watch-history'),
+/* ---------- Watch History ---------- */
+export const fetchWatchHistory = async () => {
+  const res = await fetch(`${API}/users/history`, {
+    credentials: "include",
+  });
 
-  // TODO: Clear watch history
-  clearWatchHistory: () => apiClient.post('/users/watch-history/clear'),
-}
+  if (!res.ok) throw new Error("Failed history");
 
-export default userAPI
+  const data = await res.json();
+  return data.data || [];
+};
+
+/* ---------- Videos by Owner ---------- */
+export const fetchVideosByOwner = async (ownerId) => {
+  const res = await fetch(`${API}/videos`, {
+    credentials: "include",
+  });
+
+  if (!res.ok) throw new Error("Failed videos");
+
+  const result = await res.json();
+  const allVideos = result.data.videos || [];
+
+  return allVideos.filter((v) => v.owner?._id === ownerId);
+};

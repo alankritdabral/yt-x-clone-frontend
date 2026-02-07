@@ -1,21 +1,32 @@
-// Comment API calls
-import apiClient from './axiosClient'
+const API = import.meta.env.VITE_API_BASE_URL;
 
-const commentAPI = {
-  // TODO: Get video comments
-  getVideoComments: (videoId, params) => apiClient.get(`/comments/${videoId}`, { params }),
+/* ---------- Get Comments ---------- */
+export const fetchComments = async (videoId) => {
+  const res = await fetch(`${API}/comments/${videoId}`, {
+    credentials: "include",
+  });
 
-  // TODO: Add comment to video
-  addComment: (videoId, data) => apiClient.post(`/comments/${videoId}`, data),
+  const data = await res.json();
+  return data.data?.comments || [];
+};
 
-  // TODO: Update comment
-  updateComment: (commentId, data) => apiClient.patch(`/comments/c/${commentId}`, data),
+/* ---------- Add Comment ---------- */
+export const createComment = async (videoId, content) => {
+  const res = await fetch(`${API}/comments/${videoId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ content }),
+  });
 
-  // TODO: Delete comment
-  deleteComment: (commentId) => apiClient.delete(`/comments/c/${commentId}`),
+  const data = await res.json();
+  return data.data;
+};
 
-  // TODO: Get comment by ID
-  getCommentById: (commentId) => apiClient.get(`/comments/c/${commentId}`),
-}
-
-export default commentAPI
+/* ---------- Delete Comment ---------- */
+export const removeComment = async (id) => {
+  await fetch(`${API}/comments/c/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+};
