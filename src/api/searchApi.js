@@ -2,7 +2,7 @@ const API = import.meta.env.VITE_API_BASE_URL + "/search";
 
 export const searchContent = async (query, type = "video") => {
   const response = await fetch(
-    `${API}/search?q=${encodeURIComponent(query)}&type=${type}`
+    `${API}?q=${encodeURIComponent(query)}&type=${type}`
   );
 
   if (!response.ok) {
