@@ -67,16 +67,25 @@ const RegisterPage = () => {
     }
   };
 
-
   return (
-    <div className="h-screen overflow-hidden flex items-center justify-center bg-[#F6F0D7] px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 overflow-y-auto max-h-[95vh]">
+    <div className="h-screen flex items-center justify-center bg-[#0f0f0f] px-4">
+      <div
+        className="
+          w-full max-w-md
+          bg-[#181818]
+          border border-[#2a2a2a]
+          rounded-2xl shadow-lg
+          p-8
+          overflow-y-auto max-h-[95vh]
+          text-white
+        "
+      >
         <h1 className="text-2xl font-bold text-center mb-6">
           Join <span className="text-red-600">YT-X</span>
         </h1>
 
         {error && (
-          <div className="mb-4 text-sm text-red-600 bg-red-100 px-4 py-2 rounded-lg">
+          <div className="mb-4 text-sm text-red-400 bg-red-900/30 border border-red-800 px-4 py-2 rounded-lg">
             {error}
           </div>
         )}
@@ -84,7 +93,7 @@ const RegisterPage = () => {
         <form onSubmit={handleRegister} className="space-y-4">
           {/* Full Name */}
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm text-gray-400 mb-1">
               Full Name
             </label>
             <input
@@ -92,14 +101,19 @@ const RegisterPage = () => {
               value={formData.fullName}
               onChange={handleChange}
               placeholder="Enter full name"
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+              className="
+                w-full px-4 py-2 rounded-lg
+                bg-[#202020] border border-[#2a2a2a]
+                placeholder-gray-500
+                focus:outline-none focus:border-red-600
+              "
               required
             />
           </div>
 
           {/* Username */}
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm text-gray-400 mb-1">
               Username
             </label>
             <input
@@ -107,14 +121,19 @@ const RegisterPage = () => {
               value={formData.username}
               onChange={handleChange}
               placeholder="Choose username"
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+              className="
+                w-full px-4 py-2 rounded-lg
+                bg-[#202020] border border-[#2a2a2a]
+                placeholder-gray-500
+                focus:outline-none focus:border-red-600
+              "
               required
             />
           </div>
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm text-gray-400 mb-1">
               Email
             </label>
             <input
@@ -123,14 +142,19 @@ const RegisterPage = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter email"
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+              className="
+                w-full px-4 py-2 rounded-lg
+                bg-[#202020] border border-[#2a2a2a]
+                placeholder-gray-500
+                focus:outline-none focus:border-red-600
+              "
               required
             />
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm text-gray-400 mb-1">
               Password
             </label>
 
@@ -141,14 +165,19 @@ const RegisterPage = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Create password"
-                className="w-full px-4 py-2 border rounded-lg pr-10 focus:ring-2 focus:ring-red-500 outline-none"
+                className="
+                  w-full px-4 py-2 rounded-lg pr-10
+                  bg-[#202020] border border-[#2a2a2a]
+                  placeholder-gray-500
+                  focus:outline-none focus:border-red-600
+                "
                 required
               />
 
               <button
                 type="button"
                 onClick={() => setShowPassword((p) => !p)}
-                className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                className="absolute inset-y-0 right-3 flex items-center text-gray-400"
               >
                 {showPassword ? "🙈" : "👁️"}
               </button>
@@ -157,7 +186,7 @@ const RegisterPage = () => {
 
           {/* Confirm Password */}
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm text-gray-400 mb-1">
               Confirm Password
             </label>
             <input
@@ -166,38 +195,45 @@ const RegisterPage = () => {
               value={formData.confirmPassword}
               onChange={handleChange}
               placeholder="Confirm password"
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+              className="
+                w-full px-4 py-2 rounded-lg
+                bg-[#202020] border border-[#2a2a2a]
+                placeholder-gray-500
+                focus:outline-none focus:border-red-600
+              "
               required
             />
           </div>
 
           {/* Avatar */}
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm text-gray-400 mb-1">
               Avatar (required)
             </label>
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setAvatar(e.target.files[0])}
+              className="text-sm text-gray-400"
               required
             />
           </div>
 
           {/* Cover */}
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm text-gray-400 mb-1">
               Cover Image (optional)
             </label>
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setCoverImage(e.target.files[0])}
+              className="text-sm text-gray-400"
             />
           </div>
 
           {/* Terms */}
-          <label className="flex items-center gap-2 text-sm">
+          <label className="flex items-center gap-2 text-sm text-gray-400">
             <input
               type="checkbox"
               name="agreeToTerms"
@@ -210,15 +246,20 @@ const RegisterPage = () => {
           {/* Submit */}
           <button
             disabled={loading}
-            className="w-full py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition disabled:opacity-60"
+            className="
+              w-full py-2 rounded-lg
+              bg-red-600 hover:bg-red-700
+              font-semibold transition
+              disabled:opacity-60
+            "
           >
             {loading ? "Creating account..." : "Sign Up"}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm">
+        <p className="mt-6 text-center text-sm text-gray-400">
           Already have an account?{" "}
-          <a href="/login" className="text-red-600 hover:underline">
+          <a href="/login" className="text-red-500 hover:underline">
             Login here
           </a>
         </p>

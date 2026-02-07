@@ -12,7 +12,7 @@ import {
   removeComment,
 } from "../api/commentAPI";
 
-const API = import.meta.env.VITE_API_BASE_URL;
+const API = import.meta.env.VITE_API_BASE_URL || "";
 
 const VideoPage = () => {
   const { videoId } = useParams();
@@ -44,7 +44,6 @@ const VideoPage = () => {
         setLiked(videoInfo?.isLiked || false);
         setSubscribed(videoInfo?.isSubscribed || false);
 
-        /* Subscriber count */
         if (videoInfo?.owner?._id) {
           const subRes = await fetch(
             `${API}/subscriptions/c/${videoInfo.owner._id}`,
@@ -55,16 +54,13 @@ const VideoPage = () => {
           setSubscribersCount(subData.data?.length || 0);
         }
 
-        /* Comments */
         setComments(await fetchComments(videoId));
 
-        /* History */
         await fetch(`${API}/users/history/${videoId}`, {
           method: "POST",
           credentials: "include",
         });
 
-        /* Register view */
         registerView(videoId);
 
       } catch (err) {
@@ -102,11 +98,10 @@ const VideoPage = () => {
       { method: "PATCH", credentials: "include" }
     );
 
-    alert("Added to playlist");
     setShowPlaylistPopup(false);
   };
 
-  /* ---------------- Video Like ---------------- */
+  /* ---------------- Like ---------------- */
   const toggleLike = async () => {
     const prev = liked;
 
@@ -143,7 +138,7 @@ const VideoPage = () => {
     }
   };
 
-  /* ---------------- Add Comment ---------------- */
+  /* ---------------- Comments ---------------- */
   const addComment = async () => {
     if (!newComment.trim()) return;
 
@@ -152,13 +147,11 @@ const VideoPage = () => {
     setNewComment("");
   };
 
-  /* ---------------- Delete Comment ---------------- */
   const deleteComment = async (id) => {
     await removeComment(id);
     setComments((prev) => prev.filter((c) => c._id !== id));
   };
 
-  /* ---------------- Comment Like ---------------- */
   const toggleCommentLike = async (id) => {
     setComments((prev) =>
       prev.map((c) =>
@@ -180,15 +173,19 @@ const VideoPage = () => {
     });
   };
 
-  if (loading) return <p className="p-4">Loading...</p>;
-  if (!video) return <p className="p-4">Video not found</p>;
+  if (loading)
+    return <p className="p-6 text-gray-400">Loading...</p>;
+  if (!video)
+    return <p className="p-6 text-gray-400">Video not found</p>;
 
   const videoUrl = video.videoFile.startsWith("http")
     ? video.videoFile
-    : `http://localhost:8000${video.videoFile}`;
+    : `${API}${video.videoFile}`;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 mt-4">
+    <div className="max-w-6xl w-full px-4 py-4 text-white">
+
+      {/* Video */}
       <video
         src={videoUrl}
         controls
@@ -196,12 +193,14 @@ const VideoPage = () => {
         className="w-full rounded-xl bg-black"
       />
 
+      {/* Title */}
       <h1 className="text-xl font-semibold mt-4">
         {video.title}
       </h1>
 
-      {/* Channel */}
-      <div className="flex justify-between items-center mt-3">
+      {/* Channel + Actions */}
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mt-3">
+
         <div className="flex items-center gap-3">
           <img
             src={video.owner?.avatar}
@@ -213,14 +212,16 @@ const VideoPage = () => {
             <p className="font-semibold">
               {video.owner?.username}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-400">
               {subscribersCount} subscribers
             </p>
           </div>
 
           <button
             onClick={toggleSubscribe}
-            className={`ml-4 px-4 py-2 rounded-full text-white ${subscribed ? "bg-gray-500" : "bg-black"
+            className={`ml-3 px-4 py-2 rounded-full transition ${subscribed
+                ? "bg-[#2a2a2a]"
+                : "bg-red-600 hover:bg-red-700"
               }`}
           >
             {subscribed ? "Subscribed" : "Subscribe"}
@@ -230,14 +231,14 @@ const VideoPage = () => {
         <div className="flex gap-3">
           <button
             onClick={toggleLike}
-            className="px-4 py-2 bg-gray-200 rounded-full"
+            className="px-4 py-2 bg-[#2a2a2a] hover:bg-[#3a3a3a] rounded-full"
           >
             👍 {likesCount}
           </button>
 
           <button
             onClick={openPlaylistPopup}
-            className="px-4 py-2 bg-gray-200 rounded-full"
+            className="px-4 py-2 bg-[#2a2a2a] hover:bg-[#3a3a3a] rounded-full"
           >
             ➕ Playlist
           </button>
@@ -245,21 +246,21 @@ const VideoPage = () => {
       </div>
 
       {/* Description */}
-      <div className="bg-gray-100 rounded-xl p-4 mt-4">
-        <p className="font-semibold text-sm mb-2">
+      <div className="bg-[#202020] rounded-xl p-4 mt-4">
+        <p className="font-semibold text-sm mb-2 text-gray-300">
           {(video.views || 0).toLocaleString()} views •{" "}
           {new Date(video.createdAt).toLocaleDateString()}
         </p>
 
-        <p className="whitespace-pre-line">
+        <p className="whitespace-pre-line text-gray-300">
           {showFullDesc
             ? video.description
-            : video.description?.slice(0, 150)}
+            : video.description?.slice(0, 180)}
         </p>
 
-        {video.description?.length > 150 && (
+        {video.description?.length > 180 && (
           <button
-            className="mt-2 text-sm font-semibold"
+            className="mt-2 text-sm font-semibold text-gray-400 hover:text-white"
             onClick={() => setShowFullDesc(!showFullDesc)}
           >
             {showFullDesc ? "Show less" : "Show more"}
@@ -273,11 +274,16 @@ const VideoPage = () => {
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="Add comment..."
-          className="flex-1 border rounded px-3 py-2"
+          className="
+            flex-1 bg-[#202020]
+            border border-[#2a2a2a]
+            rounded px-3 py-2
+            placeholder-gray-500
+          "
         />
         <button
           onClick={addComment}
-          className="px-4 bg-black text-white rounded"
+          className="px-4 bg-red-600 hover:bg-red-700 rounded"
         >
           Comment
         </button>
@@ -298,9 +304,9 @@ const VideoPage = () => {
                 {c.owner?.username}
               </p>
 
-              <p>{c.content}</p>
+              <p className="text-gray-300">{c.content}</p>
 
-              <div className="flex gap-4 mt-1 text-sm">
+              <div className="flex gap-4 mt-1 text-sm text-gray-400">
                 <button onClick={() => toggleCommentLike(c._id)}>
                   👍 {c.likesCount || 0}
                 </button>
@@ -319,8 +325,14 @@ const VideoPage = () => {
 
       {/* Playlist Popup */}
       {showPlaylistPopup && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-          <div className="bg-white p-6 rounded w-80">
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center"
+          onClick={() => setShowPlaylistPopup(false)}
+        >
+          <div
+            className="bg-[#181818] border border-[#2a2a2a] p-6 rounded w-80"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h2 className="font-semibold mb-3">
               Add to Playlist
             </h2>
@@ -329,7 +341,7 @@ const VideoPage = () => {
               <button
                 key={p._id}
                 onClick={() => addToPlaylist(p._id)}
-                className="block w-full text-left py-2 hover:bg-gray-100 px-2 rounded"
+                className="block w-full text-left py-2 hover:bg-[#242424] px-2 rounded"
               >
                 {p.name}
               </button>
@@ -337,7 +349,7 @@ const VideoPage = () => {
 
             <button
               onClick={() => setShowPlaylistPopup(false)}
-              className="mt-4 text-sm text-gray-500"
+              className="mt-4 text-sm text-gray-400"
             >
               Close
             </button>

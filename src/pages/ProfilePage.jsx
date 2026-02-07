@@ -5,7 +5,8 @@ import {
   fetchWatchHistory,
 } from "../api/userAPI";
 import { fetchVideosByOwner } from "../api/videoAPI";
-import { toggleSubscription } from "../api/subscriptionAPI";
+
+const API = import.meta.env.VITE_API_BASE_URL || "";
 
 const tabs = ["Home", "Videos", "History", "Playlists", "About"];
 
@@ -21,18 +22,15 @@ const ProfilePage = () => {
 
   const toggleSubscribe = async () => {
     if (!user?._id) return;
-  
+
     try {
       setSubLoading(true);
-  
-      await fetch(
-        `${API}/subscriptions/toggle/${user._id}`,
-        {
-          method: "POST",
-          credentials: "include",
-        }
-      );
-  
+
+      await fetch(`${API}/subscriptions/toggle/${user._id}`, {
+        method: "POST",
+        credentials: "include",
+      });
+
       setIsSubscribed((prev) => !prev);
     } catch (err) {
       console.error("Subscription error:", err);
@@ -40,7 +38,7 @@ const ProfilePage = () => {
       setSubLoading(false);
     }
   };
-  
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -62,30 +60,34 @@ const ProfilePage = () => {
     loadData();
   }, []);
 
-  if (loading) return <div className="p-10">Loading...</div>;
-
-
-  if (loading) return <div className="p-10">Loading...</div>;
+  if (loading)
+    return (
+      <div className="p-10 text-gray-400">
+        Loading profile...
+      </div>
+    );
 
   return (
-    <div className="w-full bg-[#F6F0D7] min-h-screen">
-      {/* Banner */}
-      <div className="h-48 md:h-60 bg-gray-300">
-        <img
-          src={user?.coverImage}
-          alt="Banner"
-          className="w-full h-full object-cover"
-        />
+    <div className="w-full bg-[#181818] text-white min-h-screen">
+      {/* ---------- Banner ---------- */}
+      <div className="h-48 md:h-60 bg-[#202020]">
+        {user?.coverImage && (
+          <img
+            src={user.coverImage}
+            alt="Banner"
+            className="w-full h-full object-cover"
+          />
+        )}
       </div>
 
-      {/* Channel Info */}
-      <div className="max-w-7xl mx-auto px-6">
+      {/* ---------- Channel Info ---------- */}
+      <div className="max-w-7xl w-full px-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between py-6 gap-4">
           <div className="flex items-center gap-5">
             <img
               src={user?.avatar}
               alt="Avatar"
-              className="w-24 h-24 rounded-full object-cover"
+              className="w-24 h-24 rounded-full object-cover border border-[#2a2a2a]"
             />
 
             <div>
@@ -93,7 +95,7 @@ const ProfilePage = () => {
                 {user?.fullName}
               </h1>
 
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-400">
                 @{user?.username} • {videos.length} videos
               </p>
             </div>
@@ -103,9 +105,9 @@ const ProfilePage = () => {
           <button
             onClick={toggleSubscribe}
             disabled={subLoading}
-            className={`px-6 py-2 rounded-full w-fit text-white ${isSubscribed
-                ? "bg-gray-600 hover:bg-gray-700"
-                : "bg-black hover:bg-gray-900"
+            className={`px-6 py-2 rounded-full font-medium transition ${isSubscribed
+                ? "bg-[#2a2a2a] hover:bg-[#3a3a3a]"
+                : "bg-red-600 hover:bg-red-700"
               }`}
           >
             {subLoading
@@ -116,15 +118,15 @@ const ProfilePage = () => {
           </button>
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-gray-300 flex gap-6 text-sm font-medium">
+        {/* ---------- Tabs ---------- */}
+        <div className="border-b border-[#2a2a2a] flex gap-6 text-sm font-medium">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-3 ${activeTab === tab
-                  ? "border-b-2 border-black text-black"
-                  : "text-gray-500 hover:text-black"
+              className={`pb-3 transition ${activeTab === tab
+                  ? "border-b-2 border-red-600 text-white"
+                  : "text-gray-500 hover:text-white"
                 }`}
             >
               {tab}
@@ -132,20 +134,36 @@ const ProfilePage = () => {
           ))}
         </div>
 
-        {/* Content */}
+        {/* ---------- Content ---------- */}
         <div className="py-6">
           {(activeTab === "Home" ||
             activeTab === "Videos") && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div
+                className="
+                grid gap-6
+                grid-cols-1
+                sm:grid-cols-2
+                md:grid-cols-3
+                lg:grid-cols-4
+              "
+              >
                 {videos.map((video) => (
                   <VideoCard key={video._id} video={video} />
                 ))}
               </div>
             )}
 
-          {/* History Tab */}
+          {/* History */}
           {activeTab === "History" && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div
+              className="
+                grid gap-6
+                grid-cols-1
+                sm:grid-cols-2
+                md:grid-cols-3
+                lg:grid-cols-4
+              "
+            >
               {history.map((video) => (
                 <VideoCard key={video._id} video={video} />
               ))}
@@ -154,7 +172,7 @@ const ProfilePage = () => {
 
           {/* About */}
           {activeTab === "About" && (
-            <div className="max-w-xl text-sm text-gray-700 space-y-2">
+            <div className="max-w-xl text-sm text-gray-400 space-y-2">
               <p>Email: {user?.email}</p>
               <p>
                 Joined:{" "}

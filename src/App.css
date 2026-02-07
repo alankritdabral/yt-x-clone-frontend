@@ -1,49 +1,63 @@
 @import "tailwindcss";
 
+/* ===============================
+   BASE LAYER
+================================ */
 @layer base {
   * {
     @apply m-0 p-0 box-border;
   }
 
   body {
-    font-family: 'Inter', 'Poppins', 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-      sans-serif;
+    font-family: "Inter", "Poppins", "DM Sans", -apple-system,
+      BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
+      "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    @apply bg-[#F6F0D7] text-[#89986D];
+
+    /* Main background like X/YT */
+    @apply bg-[#0f0f0f] text-[#f1f1f1];
   }
 }
 
+/* ===============================
+   COMPONENT LAYER
+================================ */
 @layer components {
+  /* App root */
   .app {
-    @apply flex flex-col h-screen bg-[#F6F0D7];
+    @apply flex flex-col h-screen bg-[#0f0f0f];
   }
 
   .app-container {
-    @apply flex flex-1 overflow-hidden;
+    @apply flex flex-1 overflow-hidden bg-[#0f0f0f];
   }
 
+  /* Main content area */
   .main-content {
-    @apply flex-1 overflow-y-auto p-6 bg-[#F6F0D7];
+    @apply flex-1 overflow-y-auto p-6 bg-[#181818];
   }
 
+  /* Root wrapper */
   #root {
-    @apply max-w-5xl mx-auto p-8 text-center;
+    @apply max-w-6xl mx-auto p-6;
   }
 
+  /* Logos */
   .logo {
     @apply h-24 p-6 transition-all duration-300;
   }
 
   .logo:hover {
-    filter: drop-shadow(0 0 2em rgba(156, 171, 132, 0.4));
+    filter: drop-shadow(0 0 2em rgba(255, 0, 51, 0.25));
   }
 
   .logo.react:hover {
-    filter: drop-shadow(0 0 2em rgba(137, 152, 109, 0.4));
+    filter: drop-shadow(0 0 2em rgba(255, 0, 51, 0.35));
   }
 
+  /* Animation */
   @keyframes logo-spin {
     from {
       transform: rotate(0deg);
@@ -59,11 +73,19 @@
     }
   }
 
+  /* Cards / video containers */
   .card {
-    @apply p-8 bg-[#C5D89D] rounded-[16px] border border-[#9CAB84] shadow-[0_2px_8px_rgba(0,0,0,0.08)];
+    @apply p-6 rounded-xl border border-[#2a2a2a]
+           bg-[#202020]
+           shadow-[0_2px_10px_rgba(0,0,0,0.35)]
+           transition-colors duration-200;
+  }
+
+  .card:hover {
+    @apply bg-[#252525];
   }
 
   .read-the-docs {
-    @apply text-[#89986D];
+    @apply text-[#a3a3a3];
   }
 }

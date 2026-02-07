@@ -3,7 +3,8 @@ import { Menu, Search, Bell, Video, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-const API_BASE = import.meta.env.FRONTEND_URL;
+/* Use VITE env for production builds */
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
 
 const Navbar = ({ sidebarOpen, setSidebarOpen, user }) => {
   const navigate = useNavigate();
@@ -13,8 +14,9 @@ const Navbar = ({ sidebarOpen, setSidebarOpen, user }) => {
      Search Handler
   ====================== */
   const handleSearch = () => {
-    if (!searchText.trim()) return;
-    navigate(`/search?q=${searchText}`);
+    const q = searchText.trim();
+    if (!q) return;
+    navigate(`/search?q=${encodeURIComponent(q)}`);
   };
 
   const handleKeyDown = (e) => {
@@ -27,29 +29,36 @@ const Navbar = ({ sidebarOpen, setSidebarOpen, user }) => {
   const avatarUrl = (() => {
     if (!user?.avatar) return null;
 
-    if (user.avatar.startsWith("http")) {
-      return user.avatar;
-    }
+    if (user.avatar.startsWith("http")) return user.avatar;
 
-    return `${API_BASE}${user.avatar.startsWith("/") ? "" : "/"
-      }${user.avatar}`;
+    return `${API_BASE}${user.avatar.startsWith("/") ? "" : "/"}${user.avatar
+      }`;
   })();
 
-
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 h-14 bg-white border-b border-gray-200">
-      <div className="flex items-center justify-between h-full px-4">
+    <nav
+      className="
+        fixed top-0 left-0 right-0 z-50 h-14
+        bg-[#0f0f0f]/95 backdrop-blur
+        border-b border-[#2a2a2a]
+      "
+    >
+      <div className="flex items-center justify-between h-full px-3 md:px-4">
 
         {/* LEFT */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           <button
-            className="p-2 rounded-full hover:bg-gray-100"
+            aria-label="Toggle sidebar"
+            className="p-2 rounded-full hover:bg-[#242424] transition"
             onClick={() => setSidebarOpen(!sidebarOpen)}
           >
-            <Menu size={22} />
+            <Menu size={22} className="text-gray-300" />
           </button>
 
-          <Link to="/" className="p-2 rounded-full hover:bg-gray-100">
+          <Link
+            to="/"
+            className="p-1 rounded-md hover:bg-[#242424] transition"
+          >
             <svg
               width="40"
               viewBox="0 0 512 320"
@@ -87,57 +96,95 @@ const Navbar = ({ sidebarOpen, setSidebarOpen, user }) => {
         </div>
 
         {/* CENTER SEARCH */}
-        <div className="flex items-center flex-1 max-w-xl mx-6">
+        <div className="hidden sm:flex items-center flex-1 max-w-xl mx-4">
           <div className="flex w-full">
             <input
               type="text"
-              placeholder="Search"
+              placeholder="Search videos"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="w-full px-4 py-2 border border-gray-300 rounded-l-full focus:outline-none focus:border-blue-500"
+              className="
+                w-full px-4 py-2
+                bg-[#202020]
+                border border-[#2a2a2a]
+                rounded-l-full
+                text-white placeholder-gray-500
+                focus:outline-none focus:border-red-600
+              "
             />
 
             <button
               onClick={handleSearch}
-              className="px-6 border border-l-0 border-gray-300 rounded-r-full bg-gray-100 hover:bg-gray-200"
+              aria-label="Search"
+              className="
+                px-5
+                border border-l-0 border-[#2a2a2a]
+                rounded-r-full
+                bg-[#242424]
+                hover:bg-[#2f2f2f]
+                transition
+              "
             >
-              <Search size={20} />
+              <Search size={20} className="text-gray-300" />
             </button>
           </div>
         </div>
 
         {/* RIGHT */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1 md:gap-3">
+
+          {/* Mobile search */}
+          <button
+            onClick={handleSearch}
+            className="sm:hidden p-2 rounded-full hover:bg-[#242424]"
+          >
+            <Search size={20} className="text-gray-300" />
+          </button>
 
           <Link
             to="/upload"
-            className="p-2 rounded-full hover:bg-gray-100"
+            className="p-2 rounded-full hover:bg-[#242424] transition"
+            aria-label="Upload video"
           >
-            <Video size={22} />
+            <Video size={22} className="text-gray-300" />
           </Link>
 
-          <button className="p-2 rounded-full hover:bg-gray-100">
-            <Bell size={22} />
+          <button
+            className="p-2 rounded-full hover:bg-[#242424] transition"
+            aria-label="Notifications"
+          >
+            <Bell size={22} className="text-gray-300" />
           </button>
 
           {/* Avatar */}
-          <Link to={`/profile/${user?._id}`}>
+          <Link to={`/profile/${user?._id || ""}`} className="ml-1">
             {avatarUrl ? (
               <img
                 src={avatarUrl}
                 alt="avatar"
-                className="w-8 h-8 rounded-full object-cover border"
+                className="
+                  w-8 h-8 rounded-full object-cover
+                  border border-[#2a2a2a]
+                  hover:border-red-600 transition
+                "
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center">
+              <div
+                className="
+                  w-8 h-8 rounded-full
+                  bg-[#202020]
+                  border border-[#2a2a2a]
+                  text-gray-300
+                  flex items-center justify-center
+                "
+              >
                 <User size={18} />
               </div>
             )}
           </Link>
 
         </div>
-
       </div>
     </nav>
   );

@@ -41,14 +41,14 @@ const LoginPage = ({ setIsLoggedIn, setUser }) => {
   };
 
   return (
-    <div className="h-screen overflow-hidden flex items-center justify-center bg-[#F6F0D7] px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-        <h1 className="text-2xl font-bold text-center mb-6">
+    <div className="h-screen flex items-center justify-center bg-[#0f0f0f] px-4">
+      <div className="w-full max-w-md bg-[#181818] border border-[#2a2a2a] rounded-2xl shadow-lg p-8">
+        <h1 className="text-2xl font-bold text-center mb-6 text-white">
           Login to <span className="text-red-600">YT-X</span>
         </h1>
 
         {error && (
-          <div className="mb-4 text-sm text-red-600 bg-red-100 px-4 py-2 rounded-lg">
+          <div className="mb-4 text-sm text-red-400 bg-red-900/30 border border-red-800 px-4 py-2 rounded-lg">
             {error}
           </div>
         )}
@@ -56,7 +56,7 @@ const LoginPage = ({ setIsLoggedIn, setUser }) => {
         <form onSubmit={handleLogin} className="space-y-4">
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm text-gray-400 mb-1">
               Email Address
             </label>
             <input
@@ -64,14 +64,19 @@ const LoginPage = ({ setIsLoggedIn, setUser }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="
+                w-full px-4 py-2 rounded-lg
+                bg-[#202020] border border-[#2a2a2a]
+                text-white placeholder-gray-500
+                focus:outline-none focus:ring-2 focus:ring-red-600
+              "
               required
             />
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm text-gray-400 mb-1">
               Password
             </label>
             <div className="relative">
@@ -80,13 +85,18 @@ const LoginPage = ({ setIsLoggedIn, setUser }) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="w-full px-4 py-2 border rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="
+                  w-full px-4 py-2 rounded-lg pr-10
+                  bg-[#202020] border border-[#2a2a2a]
+                  text-white placeholder-gray-500
+                  focus:outline-none focus:ring-2 focus:ring-red-600
+                "
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                className="absolute inset-y-0 right-3 flex items-center text-gray-400"
               >
                 {showPassword ? "🙈" : "👁️"}
               </button>
@@ -94,12 +104,12 @@ const LoginPage = ({ setIsLoggedIn, setUser }) => {
           </div>
 
           {/* Options */}
-          <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center gap-2">
-              <input type="checkbox" className="rounded" />
+          <div className="flex items-center justify-between text-sm text-gray-400">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" className="rounded bg-[#202020]" />
               Remember me
             </label>
-            <a href="#" className="text-red-600 hover:underline">
+            <a href="#" className="text-red-500 hover:underline">
               Forgot password?
             </a>
           </div>
@@ -108,7 +118,12 @@ const LoginPage = ({ setIsLoggedIn, setUser }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition disabled:opacity-60"
+            className="
+              w-full py-2 rounded-lg
+              bg-red-600 hover:bg-red-700
+              text-white font-semibold
+              transition disabled:opacity-60
+            "
           >
             {loading ? "Logging in..." : "Login"}
           </button>
@@ -116,21 +131,24 @@ const LoginPage = ({ setIsLoggedIn, setUser }) => {
 
         {/* Social login */}
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-500 mb-3">Or login with</p>
+          <p className="text-sm text-gray-500 mb-3">
+            Or login with
+          </p>
+
           <div className="flex gap-3">
-            <button className="flex-1 py-2 border rounded-lg hover:bg-gray-100">
+            <button className="flex-1 py-2 border border-[#2a2a2a] rounded-lg hover:bg-[#242424] transition">
               Google
             </button>
-            <button className="flex-1 py-2 border rounded-lg hover:bg-gray-100">
+            <button className="flex-1 py-2 border border-[#2a2a2a] rounded-lg hover:bg-[#242424] transition">
               GitHub
             </button>
           </div>
         </div>
 
         {/* Footer */}
-        <p className="mt-6 text-center text-sm">
+        <p className="mt-6 text-center text-sm text-gray-400">
           Don’t have an account?{" "}
-          <a href="/register" className="text-red-600 hover:underline">
+          <a href="/register" className="text-red-500 hover:underline">
             Sign up
           </a>
         </p>

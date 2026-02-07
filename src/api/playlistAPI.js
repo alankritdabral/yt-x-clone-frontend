@@ -1,4 +1,4 @@
-const API = import.meta.env.VITE_API_BASE_URL + "/playlists";
+const API = import.meta.env.VITE_API_BASE_URL + "/playlist";
 
 /* ---------- Get User Playlists ---------- */
 export const fetchUserPlaylists = async (userId) => {

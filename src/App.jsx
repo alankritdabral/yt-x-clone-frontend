@@ -5,7 +5,7 @@ import { useEffect, useState, lazy, Suspense } from "react";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 
-/* -------- Lazy-loaded pages (code splitting) -------- */
+/* -------- Lazy-loaded pages -------- */
 const HomePage = lazy(() => import("./pages/HomePage"));
 const VideoPage = lazy(() => import("./pages/VideoPage"));
 const UploadPage = lazy(() => import("./pages/UploadPage"));
@@ -26,7 +26,7 @@ const ProtectedRoute = ({ isLoggedIn, children }) => {
 
 /* ---------- Loading fallback ---------- */
 const Loader = () => (
-  <div className="flex items-center justify-center h-full">
+  <div className="flex items-center justify-center h-full text-gray-400">
     Loading...
   </div>
 );
@@ -36,7 +36,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
 
-  /* ---------- Restore user session ---------- */
+  /* ---------- Restore session ---------- */
   useEffect(() => {
     try {
       const storedUser = localStorage.getItem("user");
@@ -52,7 +52,7 @@ function App() {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen bg-[#F6F0D7]">
+    <div className="flex flex-col h-screen bg-[#0f0f0f] text-white">
       <Navbar
         user={user}
         sidebarOpen={sidebarOpen}
@@ -65,13 +65,8 @@ function App() {
           setSidebarOpen={setSidebarOpen}
         />
 
-        <main
-          className={`
-            flex-1 overflow-y-auto p-6
-            transition-all duration-300
-            ${sidebarOpen ? "ml-56" : "ml-20"}
-          `}
-        >
+        {/* ✅ FIXED MAIN */}
+        <main className="flex-1 overflow-y-auto px-6 py-6">
           <Suspense fallback={<Loader />}>
             <Routes>
               <Route path="/" element={<HomePage />} />

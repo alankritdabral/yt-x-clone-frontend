@@ -57,7 +57,6 @@ const PlaylistPage = () => {
 
     try {
       await createPlaylist(newPlaylistName);
-
       setNewPlaylistName("");
       setShowCreateForm(false);
       loadPlaylists();
@@ -77,60 +76,79 @@ const PlaylistPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black">
-      <div className="flex justify-between items-center px-6 py-4 border-b">
+    <div className="min-h-screen bg-[#181818] text-white">
+      {/* ---------- Header ---------- */}
+      <div className="flex justify-between items-center px-6 py-4 border-b border-[#2a2a2a]">
         <h1 className="text-2xl font-semibold">Playlists</h1>
 
         <button
           onClick={() => setShowCreateForm(true)}
-          className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800"
+          className="
+            bg-red-600 hover:bg-red-700
+            px-4 py-2 rounded-lg
+            text-white font-medium
+            transition
+          "
         >
           Create Playlist
         </button>
       </div>
 
+      {/* ---------- Create Playlist Form ---------- */}
       {showCreateForm && (
-        <div className="p-4 border-b flex gap-2">
+        <div className="p-4 border-b border-[#2a2a2a] flex flex-wrap gap-2">
           <input
             type="text"
             placeholder="Playlist name"
             value={newPlaylistName}
             onChange={(e) => setNewPlaylistName(e.target.value)}
-            className="border px-3 py-2 rounded w-64"
+            className="
+              bg-[#202020] border border-[#2a2a2a]
+              px-3 py-2 rounded
+              text-white placeholder-gray-500
+              focus:outline-none focus:border-red-600
+              w-64 max-w-full
+            "
           />
 
           <button
             onClick={handleCreatePlaylist}
-            className="bg-green-600 text-white px-4 rounded"
+            className="bg-red-600 px-4 rounded hover:bg-red-700"
           >
             Create
           </button>
 
           <button
             onClick={() => setShowCreateForm(false)}
-            className="bg-gray-300 px-4 rounded"
+            className="bg-[#242424] px-4 rounded hover:bg-[#2f2f2f]"
           >
             Cancel
           </button>
         </div>
       )}
 
-      <div className="flex">
-        <div className="w-72 border-r h-[calc(100vh-120px)] overflow-y-auto p-4">
-          {loading && <p>Loading...</p>}
+      {/* ---------- Layout ---------- */}
+      <div className="flex flex-col md:flex-row">
+        {/* ---------- Playlist Sidebar ---------- */}
+        <div className="md:w-72 border-r border-[#2a2a2a] h-[calc(100vh-120px)] overflow-y-auto p-4">
+          {loading && <p className="text-gray-400">Loading playlists...</p>}
 
           {playlists.map((playlist) => (
             <div
               key={playlist._id}
               onClick={() => loadPlaylistDetails(playlist._id)}
-              className={`p-3 mb-2 rounded cursor-pointer hover:bg-gray-100 ${selectedPlaylist?._id === playlist._id
-                  ? "bg-gray-200"
-                  : ""
-                }`}
+              className={`
+                p-3 mb-2 rounded cursor-pointer
+                transition
+                ${selectedPlaylist?._id === playlist._id
+                  ? "bg-[#242424]"
+                  : "hover:bg-[#242424]"
+                }
+              `}
             >
               <h3 className="font-medium">{playlist.name}</h3>
 
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-400">
                 {playlist.videos?.length || 0} videos
               </p>
 
@@ -139,7 +157,7 @@ const PlaylistPage = () => {
                   e.stopPropagation();
                   handleDeletePlaylist(playlist._id);
                 }}
-                className="text-red-600 text-sm mt-1"
+                className="text-red-500 text-sm mt-1 hover:underline"
               >
                 Delete
               </button>
@@ -147,6 +165,7 @@ const PlaylistPage = () => {
           ))}
         </div>
 
+        {/* ---------- Playlist Videos ---------- */}
         <div className="flex-1 p-6">
           {selectedPlaylist ? (
             <>
@@ -154,18 +173,31 @@ const PlaylistPage = () => {
                 {selectedPlaylist.name}
               </h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {selectedPlaylist.videos?.length > 0 ? (
-                  selectedPlaylist.videos.map((video) => (
+              {selectedPlaylist.videos?.length > 0 ? (
+                <div
+                  className="
+                    grid gap-6
+                    grid-cols-1
+                    sm:grid-cols-2
+                    md:grid-cols-3
+                    lg:grid-cols-4
+                    xl:grid-cols-5
+                  "
+                >
+                  {selectedPlaylist.videos.map((video) => (
                     <VideoCard key={video._id} video={video} />
-                  ))
-                ) : (
-                  <p>No videos in this playlist</p>
-                )}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-400">
+                  No videos in this playlist yet.
+                </p>
+              )}
             </>
           ) : (
-            <p>Select a playlist</p>
+            <p className="text-gray-400">
+              Select a playlist to view videos.
+            </p>
           )}
         </div>
       </div>

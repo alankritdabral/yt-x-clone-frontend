@@ -20,12 +20,19 @@ const SidebarItem = ({ icon: Icon, label, active, onClick, sidebarOpen }) => (
   <div
     onClick={onClick}
     className={`
-      flex items-center gap-5 px-4 py-2 mx-2 rounded-lg cursor-pointer
-      ${active ? "bg-gray-200 font-semibold" : "hover:bg-gray-100"}
+      flex items-center gap-4 px-4 py-2 mx-2 rounded-lg cursor-pointer
+      transition-colors
+      ${active
+        ? "bg-[#242424] text-white font-medium"
+        : "text-gray-400 hover:bg-[#242424] hover:text-white"
+      }
     `}
   >
     <Icon size={22} />
-    {sidebarOpen && <span className="text-sm">{label}</span>}
+
+    {sidebarOpen && (
+      <span className="text-sm whitespace-nowrap">{label}</span>
+    )}
   </div>
 );
 
@@ -34,30 +41,48 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const location = useLocation();
 
   return (
-    <aside
-      className={`
-        fixed top-14 left-0 h-[calc(100vh-56px)]
-        bg-white border-r border-gray-200
-        transition-all duration-300 z-40
-        ${sidebarOpen ? "w-56" : "w-20"}
-      `}
-    >
-      <div className="py-2">
-        {sidebarItems.map((item) => (
-          <SidebarItem
-            key={item.label}
-            icon={item.icon}
-            label={item.label}
-            sidebarOpen={sidebarOpen}
-            active={location.pathname === item.path}
-            onClick={() => {
-              navigate(item.path);
-              setSidebarOpen(false); // auto-close on mobile
-            }}
-          />
-        ))}
-      </div>
-    </aside>
+    <>
+      {/* ---------- Mobile Overlay ---------- */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <aside
+        className={`
+          fixed top-14 left-0 h-[calc(100vh-56px)]
+          bg-[#0f0f0f]
+          border-r border-[#2a2a2a]
+          transition-all duration-300 z-40
+
+          /* Desktop */
+          hidden md:block
+          ${sidebarOpen ? "w-56" : "w-20"}
+
+          /* Mobile slide-in */
+          md:translate-x-0
+          ${sidebarOpen ? "translate-x-0 w-56" : "-translate-x-full"}
+        `}
+      >
+        <div className="py-3 space-y-1">
+          {sidebarItems.map((item) => (
+            <SidebarItem
+              key={item.label}
+              icon={item.icon}
+              label={item.label}
+              sidebarOpen={sidebarOpen}
+              active={location.pathname === item.path}
+              onClick={() => {
+                navigate(item.path);
+                setSidebarOpen(false);
+              }}
+            />
+          ))}
+        </div>
+      </aside>
+    </>
   );
 };
 

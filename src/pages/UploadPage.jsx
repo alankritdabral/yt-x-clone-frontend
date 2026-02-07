@@ -19,7 +19,7 @@ const UploadPage = () => {
   const xhrRef = useRef(null);
   const videoInputRef = useRef(null);
 
-  // ---------------- CLEANUP (prevent memory leaks) ----------------
+  /* ---------------- CLEANUP ---------------- */
   useEffect(() => {
     return () => {
       if (videoPreview) URL.revokeObjectURL(videoPreview);
@@ -27,7 +27,7 @@ const UploadPage = () => {
     };
   }, [videoPreview, thumbPreview]);
 
-  // ---------------- INPUT HANDLING ----------------
+  /* ---------------- INPUT HANDLING ---------------- */
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((p) => ({ ...p, [name]: value }));
@@ -39,7 +39,6 @@ const UploadPage = () => {
 
     const file = files[0];
 
-    // Size limits
     if (name === "videoFile" && file.size > 500 * 1024 * 1024) {
       alert("Max video size 500MB");
       return;
@@ -61,7 +60,7 @@ const UploadPage = () => {
     }
   };
 
-  // ---------------- DRAG & DROP ----------------
+  /* ---------------- DRAG & DROP ---------------- */
   const handleDrop = (e) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
@@ -81,7 +80,7 @@ const UploadPage = () => {
     setVideoPreview(URL.createObjectURL(file));
   };
 
-  // ---------------- VALIDATION ----------------
+  /* ---------------- VALIDATION ---------------- */
   const validate = () => {
     if (!formData.title.trim()) {
       alert("Title required");
@@ -101,7 +100,16 @@ const UploadPage = () => {
     return true;
   };
 
-  // ---------------- RESET FORM ----------------
+  /* ---------------- CANCEL UPLOAD ---------------- */
+  const cancelUpload = () => {
+    if (xhrRef.current) {
+      xhrRef.current.abort();
+    }
+    setUploading(false);
+    setUploadProgress(0);
+  };
+
+  /* ---------------- RESET ---------------- */
   const resetForm = () => {
     setFormData({
       title: "",
@@ -117,7 +125,7 @@ const UploadPage = () => {
     setUploadProgress(0);
   };
 
-  // ---------------- UPLOAD ----------------
+  /* ---------------- UPLOAD ---------------- */
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()) return;
@@ -145,10 +153,12 @@ const UploadPage = () => {
     });
   };
 
-  // ---------------- UI ----------------
+  /* ---------------- UI ---------------- */
   return (
-    <div className="max-w-5xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Upload Video</h1>
+    <div className="max-w-5xl w-full p-6 text-white">
+      <h1 className="text-3xl font-bold mb-6">
+        Upload Video
+      </h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
 
@@ -157,9 +167,18 @@ const UploadPage = () => {
           onClick={() => videoInputRef.current.click()}
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDrop}
-          className="border-2 border-dashed rounded-lg p-8 text-center bg-gray-50 cursor-pointer hover:bg-gray-100"
+          className="
+            border-2 border-dashed border-[#2a2a2a]
+            rounded-lg p-8 text-center
+            bg-[#202020]
+            cursor-pointer
+            hover:bg-[#242424]
+            transition
+          "
         >
-          <p className="font-medium">Drag & Drop or Click to Upload</p>
+          <p className="font-medium text-gray-300">
+            Drag & Drop or Click to Upload Video
+          </p>
 
           <input
             ref={videoInputRef}
@@ -187,7 +206,13 @@ const UploadPage = () => {
           placeholder="Title"
           value={formData.title}
           onChange={handleInputChange}
-          className="w-full border p-3 rounded-lg"
+          className="
+            w-full bg-[#202020]
+            border border-[#2a2a2a]
+            p-3 rounded-lg
+            placeholder-gray-500
+            focus:outline-none focus:border-red-600
+          "
         />
 
         {/* DESCRIPTION */}
@@ -197,15 +222,30 @@ const UploadPage = () => {
           placeholder="Description"
           value={formData.description}
           onChange={handleInputChange}
-          className="w-full border p-3 rounded-lg"
+          className="
+            w-full bg-[#202020]
+            border border-[#2a2a2a]
+            p-3 rounded-lg
+            placeholder-gray-500
+            focus:outline-none focus:border-red-600
+          "
         />
 
-        {/* THUMBNAIL UPLOAD */}
+        {/* THUMBNAIL */}
         <div
           onClick={() => document.getElementById("thumbInput").click()}
-          className="border-2 border-dashed rounded-lg p-6 text-center bg-gray-50 cursor-pointer hover:bg-gray-100"
+          className="
+            border-2 border-dashed border-[#2a2a2a]
+            rounded-lg p-6 text-center
+            bg-[#202020]
+            cursor-pointer
+            hover:bg-[#242424]
+            transition
+          "
         >
-          <p className="font-medium">Click to Upload Thumbnail</p>
+          <p className="font-medium text-gray-300">
+            Click to Upload Thumbnail
+          </p>
 
           <input
             id="thumbInput"
@@ -220,18 +260,22 @@ const UploadPage = () => {
             <img
               src={thumbPreview}
               alt="Thumbnail preview"
-              className="w-60 mx-auto mt-4 rounded-lg"
+              className="w-60 w-full mt-4 rounded-lg"
             />
           )}
         </div>
-
 
         {/* CATEGORY */}
         <select
           name="category"
           value={formData.category}
           onChange={handleInputChange}
-          className="border p-3 rounded-lg"
+          className="
+            bg-[#202020]
+            border border-[#2a2a2a]
+            p-3 rounded-lg
+            focus:outline-none focus:border-red-600
+          "
         >
           <option value="general">General</option>
           <option value="gaming">Gaming</option>
@@ -240,7 +284,7 @@ const UploadPage = () => {
         </select>
 
         {/* PUBLISH */}
-        <label className="flex gap-2 items-center">
+        <label className="flex gap-2 items-center text-gray-400">
           <input
             type="checkbox"
             checked={formData.isPublished}
@@ -258,12 +302,12 @@ const UploadPage = () => {
         {uploading && (
           <div>
             <progress value={uploadProgress} max="100" className="w-full" />
-            <p>{uploadProgress}%</p>
+            <p className="mt-1">{uploadProgress}%</p>
 
             <button
               type="button"
               onClick={cancelUpload}
-              className="text-red-500"
+              className="text-red-500 mt-2"
             >
               Cancel Upload
             </button>
@@ -273,11 +317,14 @@ const UploadPage = () => {
         {/* SUBMIT */}
         <button
           disabled={uploading}
-          className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 disabled:opacity-50"
+          className="
+            bg-red-600 hover:bg-red-700
+            text-white px-6 py-3 rounded-lg
+            disabled:opacity-50 transition
+          "
         >
           {uploading ? "Uploading..." : "Upload Video"}
         </button>
-
       </form>
     </div>
   );

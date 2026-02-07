@@ -1,16 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-const API = import.meta.env.VITE_API_BASE_URL;
+const API = import.meta.env.VITE_API_BASE_URL || "";
 
 const VideoCard = ({ video }) => {
   const navigate = useNavigate();
 
-  const [showPlaylistPopup, setShowPlaylistPopup] =
-    useState(false);
+  const [showPlaylistPopup, setShowPlaylistPopup] = useState(false);
   const [playlists, setPlaylists] = useState([]);
-  const [newPlaylistName, setNewPlaylistName] =
-    useState("");
+  const [newPlaylistName, setNewPlaylistName] = useState("");
 
   /* ---------- Helpers ---------- */
   const getThumbnailUrl = () => {
@@ -20,7 +18,7 @@ const VideoCard = ({ video }) => {
     if (video.thumbnail.startsWith("http"))
       return video.thumbnail;
 
-    return `http://localhost:8000${video.thumbnail}`;
+    return `${API}${video.thumbnail}`;
   };
 
   const getAvatarUrl = () => {
@@ -30,7 +28,7 @@ const VideoCard = ({ video }) => {
     if (video.owner.avatar.startsWith("http"))
       return video.owner.avatar;
 
-    return `http://localhost:8000/${video.owner.avatar}`;
+    return `${API}/${video.owner.avatar}`;
   };
 
   const formatViews = (views = 0) => {
@@ -57,8 +55,7 @@ const VideoCard = ({ video }) => {
     for (const i of intervals) {
       const count = Math.floor(seconds / i.seconds);
       if (count >= 1)
-        return `${count} ${i.label}${count > 1 ? "s" : ""
-          } ago`;
+        return `${count} ${i.label}${count > 1 ? "s" : ""} ago`;
     }
     return "just now";
   };
@@ -72,9 +69,7 @@ const VideoCard = ({ video }) => {
     e.stopPropagation();
 
     try {
-      const user = JSON.parse(
-        localStorage.getItem("user")
-      );
+      const user = JSON.parse(localStorage.getItem("user"));
       if (!user?._id) return;
 
       const res = await fetch(
@@ -100,7 +95,6 @@ const VideoCard = ({ video }) => {
         }
       );
 
-      alert("Added to playlist");
       setShowPlaylistPopup(false);
     } catch (err) {
       console.error(err);
@@ -115,9 +109,7 @@ const VideoCard = ({ video }) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          name: newPlaylistName,
-        }),
+        body: JSON.stringify({ name: newPlaylistName }),
       });
 
       const data = await res.json();
@@ -134,8 +126,6 @@ const VideoCard = ({ video }) => {
       setPlaylists((prev) => [...prev, playlist]);
       setNewPlaylistName("");
       setShowPlaylistPopup(false);
-
-      alert("Playlist created & video added");
     } catch (err) {
       console.error(err);
     }
@@ -145,20 +135,27 @@ const VideoCard = ({ video }) => {
     <>
       <div
         onClick={handleClick}
-        className="cursor-pointer"
+        className="cursor-pointer group"
       >
         {/* Thumbnail */}
-        <div className="relative rounded-xl overflow-hidden bg-gray-200 group aspect-[16/10]">
+        <div className="relative rounded-xl overflow-hidden bg-[#202020] aspect-video">
           <img
             src={getThumbnailUrl()}
             alt={video?.title}
+            loading="lazy"
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
 
           {/* Playlist button */}
           <button
             onClick={openPlaylistPopup}
-            className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100"
+            className="
+              absolute top-2 right-2
+              bg-black/70 hover:bg-black/90
+              text-white px-2 py-1 rounded
+              opacity-0 group-hover:opacity-100
+              transition
+            "
           >
             ➕
           </button>
@@ -171,7 +168,7 @@ const VideoCard = ({ video }) => {
         </div>
 
         {/* Info */}
-        <div className="mt-3 flex gap-2 items-start">
+        <div className="mt-3 flex gap-3">
           <img
             src={getAvatarUrl()}
             alt={video?.owner?.username}
@@ -179,83 +176,81 @@ const VideoCard = ({ video }) => {
           />
 
           <div className="flex flex-col flex-1">
-            <h3 className="text-sm font-medium leading-snug line-clamp-2 text-left">
+            <h3 className="text-sm font-medium leading-snug line-clamp-2 text-white">
               {video?.title}
             </h3>
 
-            <p className="text-xs text-gray-600 mt-1 text-left">
+            <p className="text-xs text-gray-400 mt-1">
               {video?.owner?.username}
             </p>
 
-            <div className="text-xs text-gray-600 flex items-center gap-1">
-              <span>
-                {formatViews(video?.views)} views
-              </span>
+            <div className="text-xs text-gray-500 flex items-center gap-1">
+              <span>{formatViews(video?.views)} views</span>
               <span>•</span>
-              <span>
-                {timeAgo(video?.createdAt)}
-              </span>
+              <span>{timeAgo(video?.createdAt)}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Playlist Popup */}
+      {/* ---------- Playlist Popup ---------- */}
       {showPlaylistPopup && (
         <div
-          className="fixed inset-0 bg-black/40 flex justify-center items-center z-50"
-          onClick={() =>
-            setShowPlaylistPopup(false)
-          }
+          className="fixed inset-0 bg-black/50 flex justify-center items-center z-50"
+          onClick={() => setShowPlaylistPopup(false)}
         >
           <div
-            className="bg-white p-5 rounded w-80"
-            onClick={(e) =>
-              e.stopPropagation()
-            }
+            className="
+              bg-[#181818]
+              border border-[#2a2a2a]
+              p-5 rounded-lg w-80 text-white
+            "
+            onClick={(e) => e.stopPropagation()}
           >
             <h3 className="font-semibold mb-3">
               Save to playlist
             </h3>
 
-            {playlists.map((p) => (
-              <div
-                key={p._id}
-                className="p-2 border mb-2 cursor-pointer hover:bg-gray-100"
-                onClick={() =>
-                  addToPlaylist(p._id)
-                }
-              >
-                {p.name}
-              </div>
-            ))}
+            <div className="max-h-48 overflow-y-auto">
+              {playlists.map((p) => (
+                <div
+                  key={p._id}
+                  className="p-2 mb-2 rounded cursor-pointer hover:bg-[#242424]"
+                  onClick={() => addToPlaylist(p._id)}
+                >
+                  {p.name}
+                </div>
+              ))}
+            </div>
 
             {/* Create playlist */}
-            <div className="mt-3 border-t pt-3">
+            <div className="mt-3 border-t border-[#2a2a2a] pt-3">
               <input
                 value={newPlaylistName}
                 onChange={(e) =>
-                  setNewPlaylistName(
-                    e.target.value
-                  )
+                  setNewPlaylistName(e.target.value)
                 }
                 placeholder="New playlist name"
-                className="w-full border px-3 py-2 rounded mb-2"
+                className="
+                  w-full bg-[#202020]
+                  border border-[#2a2a2a]
+                  px-3 py-2 rounded mb-2
+                  placeholder-gray-500
+                  focus:outline-none focus:border-red-600
+                "
               />
 
               <button
                 onClick={createPlaylist}
-                className="w-full bg-black text-white py-2 rounded"
+                className="w-full bg-red-600 hover:bg-red-700 py-2 rounded"
               >
                 Create playlist
               </button>
             </div>
 
             <button
-              onClick={() =>
-                setShowPlaylistPopup(false)
-              }
-              className="mt-3 w-full bg-gray-200 py-2 rounded"
+              onClick={() => setShowPlaylistPopup(false)}
+              className="mt-3 w-full bg-[#242424] py-2 rounded hover:bg-[#2f2f2f]"
             >
               Close
             </button>
