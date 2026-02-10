@@ -20,7 +20,11 @@ const LikedVideos = lazy(() => import("./pages/LikedVideos"));
 
 /* ---------- Protected Route ---------- */
 const ProtectedRoute = ({ isLoggedIn, children }) => {
-  if (!isLoggedIn) return <Navigate to="/login" replace />;
+  if (!isLoggedIn) {
+    alert("Please login to continue");
+    return <Navigate to="/login" replace />;
+  }
+
   return children;
 };
 
@@ -38,23 +42,41 @@ function App() {
 
   /* ---------- Restore session ---------- */
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem("user");
+    const restoreSession = async () => {
+      try {
+        const storedUser = localStorage.getItem("user");
 
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setIsLoggedIn(true);
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          setIsLoggedIn(true);
+
+          const API = import.meta.env.VITE_API_BASE_URL;
+
+          const res = await fetch(`${API}/users/refresh-token`, {
+            method: "POST",
+            credentials: "include",
+          });
+
+          if (!res.ok) throw new Error("Refresh failed");
+        }
+      } catch (err) {
+        console.error(err);
+        localStorage.removeItem("user");
+        setUser(null);
+        setIsLoggedIn(false);
       }
-    } catch {
-      localStorage.removeItem("user");
-    }
+    };
+
+    restoreSession();
   }, []);
 
   return (
     <div className="flex flex-col h-screen bg-[#0f0f0f] text-white">
       <Navbar
         user={user}
+        setUser={setUser}
+        setIsLoggedIn={setIsLoggedIn}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
       />
@@ -65,10 +87,10 @@ function App() {
           setSidebarOpen={setSidebarOpen}
         />
 
-        {/* ✅ FIXED MAIN */}
         <main className="flex-1 overflow-y-auto px-6 py-6">
           <Suspense fallback={<Loader />}>
             <Routes>
+              {/* Public routes */}
               <Route path="/" element={<HomePage />} />
               <Route path="/watch/:videoId" element={<VideoPage />} />
               <Route path="/profile/:username" element={<ProfilePage />} />
@@ -76,7 +98,7 @@ function App() {
               <Route path="/playlist/:id" element={<PlaylistPage />} />
               <Route path="/tweets" element={<TweetFeedPage />} />
 
-              {/* Protected Routes */}
+              {/* Protected routes */}
               <Route
                 path="/upload"
                 element={
@@ -104,19 +126,25 @@ function App() {
                 }
               />
 
+              {/* Login */}
               <Route
                 path="/login"
                 element={
-                  <LoginPage
-                    setIsLoggedIn={setIsLoggedIn}
-                    setUser={setUser}
-                  />
+                  isLoggedIn ? (
+                    <Navigate to="/" />
+                  ) : (
+                    <LoginPage
+                      setIsLoggedIn={setIsLoggedIn}
+                      setUser={setUser}
+                    />
+                  )
                 }
               />
 
+              {/* Register */}
               <Route path="/register" element={<RegisterPage />} />
 
-              {/* 404 fallback */}
+              {/* 404 */}
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </Suspense>
