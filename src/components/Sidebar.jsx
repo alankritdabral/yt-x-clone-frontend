@@ -49,23 +49,27 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           onClick={() => setSidebarOpen(false)}
         />
       )}
-
       <aside
         className={`
-          fixed top-14 left-0 h-[calc(100vh-56px)]
-          bg-[#0f0f0f]
-          border-r border-[#2a2a2a]
-          transition-all duration-300 z-40
+    fixed top-14 left-0 h-[calc(100vh-56px)]
+    bg-[#0f0f0f]
+    border-r border-[#2a2a2a]
+    transition-all duration-300 z-40
 
-          /* Desktop */
-          hidden md:block
-          ${sidebarOpen ? "w-56" : "w-20"}
+    w-56
+    transform
 
-          /* Mobile slide-in */
-          md:translate-x-0
-          ${sidebarOpen ? "translate-x-0 w-56" : "-translate-x-full"}
-        `}
+    /* Mobile slide */
+    ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+
+    /* Desktop behavior */
+    md:translate-x-0
+    ${sidebarOpen ? "md:w-56" : "md:w-20"}
+  `}
       >
+
+
+
         <div className="py-3 space-y-1">
           {sidebarItems.map((item) => (
             <SidebarItem
