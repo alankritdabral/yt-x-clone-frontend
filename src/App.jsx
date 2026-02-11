@@ -24,11 +24,10 @@ const ProtectedRoute = ({ isLoggedIn, children }) => {
     alert("Please login to continue");
     return <Navigate to="/login" replace />;
   }
-
   return children;
 };
 
-/* ---------- Loading fallback ---------- */
+/* ---------- Loader ---------- */
 const Loader = () => (
   <div className="flex items-center justify-center h-full text-gray-400">
     Loading...
@@ -40,28 +39,33 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
 
-  /* ---------- Restore session ---------- */
+  /* ---------- Restore Session ---------- */
   useEffect(() => {
     const restoreSession = async () => {
       try {
         const storedUser = localStorage.getItem("user");
-
-        if (storedUser) {
-          const parsedUser = JSON.parse(storedUser);
-          setUser(parsedUser);
-          setIsLoggedIn(true);
-
-          const API = import.meta.env.VITE_API_BASE_URL;
-
-          const res = await fetch(`${API}/users/refresh-token`, {
-            method: "POST",
-            credentials: "include",
-          });
-
-          if (!res.ok) throw new Error("Refresh failed");
+        console.log("Restoring session...");
+        if (!storedUser) {
+          setUser(null);
+          setIsLoggedIn(false);
+          return;
         }
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        setIsLoggedIn(true);
+
+        const API = import.meta.env.VITE_API_BASE_URL;
+
+        const res = await fetch(`${API}/users/refresh-token`, {
+          method: "POST",
+          credentials: "include",
+        });
+
+        if (!res.ok) throw new Error("Refresh failed");
+
+        console.log("Session restored");
       } catch (err) {
-        console.error(err);
+        console.error("Session restore failed:", err);
         localStorage.removeItem("user");
         setUser(null);
         setIsLoggedIn(false);
@@ -90,7 +94,7 @@ function App() {
         <main className="flex-1 overflow-y-auto px-6 py-6">
           <Suspense fallback={<Loader />}>
             <Routes>
-              {/* Public routes */}
+              {/* Public */}
               <Route path="/" element={<HomePage />} />
               <Route path="/watch/:videoId" element={<VideoPage />} />
               <Route path="/profile/:username" element={<ProfilePage />} />
@@ -98,7 +102,7 @@ function App() {
               <Route path="/playlist/:id" element={<PlaylistPage />} />
               <Route path="/tweets" element={<TweetFeedPage />} />
 
-              {/* Protected routes */}
+              {/* Protected */}
               <Route
                 path="/upload"
                 element={
@@ -141,7 +145,6 @@ function App() {
                 }
               />
 
-              {/* Register */}
               <Route path="/register" element={<RegisterPage />} />
 
               {/* 404 */}

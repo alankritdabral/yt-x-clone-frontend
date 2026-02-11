@@ -32,11 +32,16 @@ const VideoPage = () => {
 
   const [showPlaylistPopup, setShowPlaylistPopup] = useState(false);
   const [playlists, setPlaylists] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
 
   /* ---------------- Fetch Data ---------------- */
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const storedUser = localStorage.getItem("user");
+        if (!storedUser) setIsLoggedIn(false);
+
         const videoInfo = await fetchVideo(videoId);
 
         setVideo(videoInfo);
@@ -55,13 +60,14 @@ const VideoPage = () => {
         }
 
         setComments(await fetchComments(videoId));
-
-        await fetch(`${API}/users/history/${videoId}`, {
-          method: "POST",
-          credentials: "include",
-        });
-
-        registerView(videoId);
+        if (isLoggedIn) {
+          await fetch(`${API}/users/history/${videoId}`, {
+            method: "POST",
+            credentials: "include",
+          });
+          
+          registerView(videoId);
+        }
 
       } catch (err) {
         console.error(err);
@@ -220,8 +226,8 @@ const VideoPage = () => {
           <button
             onClick={toggleSubscribe}
             className={`ml-3 px-4 py-2 rounded-full transition ${subscribed
-                ? "bg-[#2a2a2a]"
-                : "bg-red-600 hover:bg-red-700"
+              ? "bg-[#2a2a2a]"
+              : "bg-red-600 hover:bg-red-700"
               }`}
           >
             {subscribed ? "Subscribed" : "Subscribe"}
