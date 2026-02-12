@@ -54,7 +54,7 @@ export const uploadVideo = ({
   const xhr = new XMLHttpRequest();
   xhrRef.current = xhr;
 
-  xhr.open("POST", `${API}/videos/upload`);
+  xhr.open("POST", `${API}/videos/`);
   xhr.withCredentials = true;
 
   const startTime = Date.now();
