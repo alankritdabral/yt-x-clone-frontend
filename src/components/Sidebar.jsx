@@ -6,6 +6,7 @@ import {
   PlaySquare,
   Clock,
   ThumbsUp,
+  MessageSquare,
 } from "lucide-react";
 
 const sidebarItems = [
@@ -14,6 +15,7 @@ const sidebarItems = [
   { label: "Playlist", icon: PlaySquare, path: "/playlist/subscriptions" },
   { label: "Watch History", icon: Clock, path: "/history" },
   { label: "Liked Videos", icon: ThumbsUp, path: "/liked-videos" },
+  { label: "Messages", icon: MessageSquare, path: "/tweets" },
 ];
 
 const SidebarItem = ({ icon: Icon, label, active, onClick, sidebarOpen }) => (

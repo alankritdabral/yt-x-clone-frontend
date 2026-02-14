@@ -46,6 +46,7 @@ function App() {
         const storedUser = localStorage.getItem("user");
         console.log("Restoring session...");
         if (!storedUser) {
+          console.log("No user found in localStorage");
           setUser(null);
           setIsLoggedIn(false);
           return;
@@ -150,6 +151,7 @@ function App() {
                   )
                 }
               />
+              <Route path="/tweets" element={<TweetFeedPage />} />
 
               <Route path="/register" element={<RegisterPage />} />
 
