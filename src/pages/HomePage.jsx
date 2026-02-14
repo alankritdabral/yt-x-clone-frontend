@@ -43,19 +43,20 @@ const HomePage = () => {
           /* ---------- Video Grid ---------- */
           <div
             className="
-              grid gap-6
-              grid-cols-1
-              sm:grid-cols-2
-              md:grid-cols-3
-              lg:grid-cols-4
-              xl:grid-cols-5
-              2xl:grid-cols-6
-            "
+    grid gap-8
+    grid-cols-1
+    sm:grid-cols-2
+    md:grid-cols-3
+    lg:grid-cols-4
+    xl:grid-cols-4
+    2xl:grid-cols-4
+  "
           >
             {videos.map((video) => (
               <VideoCard key={video._id} video={video} />
             ))}
           </div>
+
         ) : (
           /* ---------- Empty State ---------- */
           <div className="flex flex-col items-center justify-center py-20 text-gray-400">

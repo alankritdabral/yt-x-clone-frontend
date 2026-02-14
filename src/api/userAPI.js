@@ -17,6 +17,21 @@ export const loginUser = async (email, password) => {
   return response.json();
 };
 
+/* -------- Logout User -------- */
+export const logoutUser = async () => {
+  const response = await fetch(`${API}/users/logout`, {
+    method: "POST",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.message || "Logout failed");
+  }
+
+  return response.json();
+};
+
 /* ---------- Register ---------- */
 export const registerUser = async (formData) => {
   const response = await fetch(`${API}/users/register`, {

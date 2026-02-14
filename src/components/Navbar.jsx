@@ -1,12 +1,19 @@
 // src/components/Navbar.jsx
-import { Menu, Search, Bell, Video, User } from "lucide-react";
+import { Menu, Search, Video, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { logoutUser } from "../api/userAPI";
 
 /* Use VITE env for production builds */
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
 
-const Navbar = ({ sidebarOpen, setSidebarOpen, user }) => {
+const Navbar = ({
+  sidebarOpen,
+  setSidebarOpen,
+  user,
+  setUser,
+  setIsLoggedIn,
+}) => {
   const navigate = useNavigate();
   const [searchText, setSearchText] = useState("");
 
@@ -21,6 +28,23 @@ const Navbar = ({ sidebarOpen, setSidebarOpen, user }) => {
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") handleSearch();
+  };
+
+  /* ======================
+     Logout Handler
+  ====================== */
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+    setIsLoggedIn(false);
+
+    logoutUser()
+      .then(() => {
+        navigate("/login");
+      })
+      .catch((error) => {
+        console.error("Logout error:", error);
+      });
   };
 
   /* ======================
@@ -44,7 +68,6 @@ const Navbar = ({ sidebarOpen, setSidebarOpen, user }) => {
       "
     >
       <div className="flex items-center justify-between h-full px-3 md:px-4">
-
         {/* LEFT */}
         <div className="flex items-center gap-2 md:gap-4">
           <button
@@ -133,7 +156,6 @@ const Navbar = ({ sidebarOpen, setSidebarOpen, user }) => {
 
         {/* RIGHT */}
         <div className="flex items-center gap-1 md:gap-3">
-
           {/* Mobile search */}
           <button
             onClick={handleSearch}
@@ -142,6 +164,7 @@ const Navbar = ({ sidebarOpen, setSidebarOpen, user }) => {
             <Search size={20} className="text-gray-300" />
           </button>
 
+          {/* Upload */}
           <Link
             to="/upload"
             className="p-2 rounded-full hover:bg-[#242424] transition"
@@ -150,12 +173,22 @@ const Navbar = ({ sidebarOpen, setSidebarOpen, user }) => {
             <Video size={22} className="text-gray-300" />
           </Link>
 
-          <button
-            className="p-2 rounded-full hover:bg-[#242424] transition"
-            aria-label="Notifications"
-          >
-            <Bell size={22} className="text-gray-300" />
-          </button>
+          {/* Sign in / Sign out */}
+          {user ? (
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1 text-sm rounded-md bg-[#242424] hover:bg-[#2f2f2f] transition"
+            >
+              Sign out
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              className="px-3 py-1 text-sm rounded-md bg-[#242424] hover:bg-[#2f2f2f] transition"
+            >
+              Sign in
+            </Link>
+          )}
 
           {/* Avatar */}
           <Link to={`/profile/${user?._id || ""}`} className="ml-1">
@@ -183,7 +216,6 @@ const Navbar = ({ sidebarOpen, setSidebarOpen, user }) => {
               </div>
             )}
           </Link>
-
         </div>
       </div>
     </nav>

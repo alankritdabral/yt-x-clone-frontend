@@ -67,9 +67,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     ${sidebarOpen ? "md:w-56" : "md:w-20"}
   `}
       >
-
-
-
         <div className="py-3 space-y-1">
           {sidebarItems.map((item) => (
             <SidebarItem

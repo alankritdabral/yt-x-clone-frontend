@@ -41,7 +41,7 @@
 
   /* Root wrapper */
   #root {
-    @apply max-w-6xl mx-auto p-6;
+    @apply h-full w-full;
   }
 
   /* Logos */

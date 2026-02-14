@@ -85,13 +85,19 @@ function App() {
         setSidebarOpen={setSidebarOpen}
       />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden pt-14">
+
         <Sidebar
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
         />
 
-        <main className="flex-1 overflow-y-auto px-6 py-6">
+        <main
+          className={`flex-1 overflow-y-auto px-6 py-6 transition-all duration-300
+    ${sidebarOpen ? "md:ml-56" : "md:ml-20"}
+  `}
+        >
+
           <Suspense fallback={<Loader />}>
             <Routes>
               {/* Public */}

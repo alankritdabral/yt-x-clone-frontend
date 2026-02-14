@@ -13,6 +13,16 @@ import {
 } from "../api/commentAPI";
 
 const API = import.meta.env.VITE_API_BASE_URL || "";
+const requireLogin = () => {
+  const user = localStorage.getItem("user");
+
+  if (!user) {
+    alert("Please login to continue");
+    return false;
+  }
+  return true;
+};
+
 
 const VideoPage = () => {
   const { videoId } = useParams();
@@ -65,7 +75,7 @@ const VideoPage = () => {
             method: "POST",
             credentials: "include",
           });
-          
+
           registerView(videoId);
         }
 
@@ -82,6 +92,7 @@ const VideoPage = () => {
   /* ---------------- Playlist ---------------- */
   const openPlaylistPopup = async () => {
     try {
+      if (!requireLogin()) return;
       const user = JSON.parse(localStorage.getItem("user"));
       if (!user?._id) return;
 
@@ -109,8 +120,9 @@ const VideoPage = () => {
 
   /* ---------------- Like ---------------- */
   const toggleLike = async () => {
-    const prev = liked;
+    if (!requireLogin()) return;
 
+    const prev = liked;
     setLiked(!prev);
     setLikesCount((c) => (prev ? Math.max(c - 1, 0) : c + 1));
 
@@ -125,6 +137,7 @@ const VideoPage = () => {
 
   /* ---------------- Subscribe ---------------- */
   const toggleSubscribe = async () => {
+    if (!requireLogin()) return;
     if (!video?.owner?._id) return;
 
     const prev = subscribed;
@@ -144,8 +157,10 @@ const VideoPage = () => {
     }
   };
 
+
   /* ---------------- Comments ---------------- */
   const addComment = async () => {
+    if (!requireLogin()) return;
     if (!newComment.trim()) return;
 
     const comment = await createComment(videoId, newComment);
@@ -154,11 +169,16 @@ const VideoPage = () => {
   };
 
   const deleteComment = async (id) => {
+    if (!requireLogin()) return;
+
     await removeComment(id);
     setComments((prev) => prev.filter((c) => c._id !== id));
   };
 
+
   const toggleCommentLike = async (id) => {
+    if (!requireLogin()) return;
+
     setComments((prev) =>
       prev.map((c) =>
         c._id === id
@@ -178,6 +198,7 @@ const VideoPage = () => {
       credentials: "include",
     });
   };
+
 
   if (loading)
     return <p className="p-6 text-gray-400">Loading...</p>;
