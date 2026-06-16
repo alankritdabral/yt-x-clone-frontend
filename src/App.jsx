@@ -1,6 +1,7 @@
 import "./App.css";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useState, lazy, Suspense } from "react";
+import { useAuth } from "./hooks/useAuth";
 
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
@@ -19,7 +20,13 @@ const WatchHistory = lazy(() => import("./pages/WatchHistory"));
 const LikedVideos = lazy(() => import("./pages/LikedVideos"));
 
 /* ---------- Protected Route ---------- */
-const ProtectedRoute = ({ isLoggedIn, children }) => {
+const ProtectedRoute = ({ children }) => {
+  const { isLoggedIn, loading } = useAuth();
+  
+  if (loading) {
+    return <div className="flex items-center justify-center h-full text-gray-400">Loading auth...</div>;
+  }
+
   if (!isLoggedIn) {
     alert("Please login to continue");
     return <Navigate to="/login" replace />;
@@ -36,69 +43,28 @@ const Loader = () => (
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
+  const { isLoggedIn, loading } = useAuth();
 
-  /* ---------- Restore Session ---------- */
-  useEffect(() => {
-    const restoreSession = async () => {
-      try {
-        const storedUser = localStorage.getItem("user");
-        console.log("Restoring session...");
-        if (!storedUser) {
-          console.log("No user found in localStorage");
-          setUser(null);
-          setIsLoggedIn(false);
-          return;
-        }
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setIsLoggedIn(true);
-
-        const API = import.meta.env.VITE_API_BASE_URL;
-
-        const res = await fetch(`${API}/users/refresh-token`, {
-          method: "POST",
-          credentials: "include",
-        });
-
-        if (!res.ok) throw new Error("Refresh failed");
-
-        console.log("Session restored");
-      } catch (err) {
-        console.error("Session restore failed:", err);
-        localStorage.removeItem("user");
-        setUser(null);
-        setIsLoggedIn(false);
-      }
-    };
-
-    restoreSession();
-  }, []);
+  if (loading) return <Loader />;
 
   return (
     <div className="flex flex-col h-screen bg-[#0f0f0f] text-white">
       <Navbar
-        user={user}
-        setUser={setUser}
-        setIsLoggedIn={setIsLoggedIn}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
       />
 
       <div className="flex flex-1 overflow-hidden pt-14">
-
         <Sidebar
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
         />
 
         <main
-          className={`flex-1 overflow-y-auto px-6 py-6 transition-all duration-300
-    ${sidebarOpen ? "md:ml-56" : "md:ml-20"}
+          className={`flex-1 overflow-y-auto transition-all duration-300
+    ${sidebarOpen ? "md:ml-60" : "md:ml-[72px]"}
   `}
         >
-
           <Suspense fallback={<Loader />}>
             <Routes>
               {/* Public */}
@@ -113,7 +79,7 @@ function App() {
               <Route
                 path="/upload"
                 element={
-                  <ProtectedRoute isLoggedIn={isLoggedIn}>
+                  <ProtectedRoute>
                     <UploadPage />
                   </ProtectedRoute>
                 }
@@ -122,7 +88,7 @@ function App() {
               <Route
                 path="/history"
                 element={
-                  <ProtectedRoute isLoggedIn={isLoggedIn}>
+                  <ProtectedRoute>
                     <WatchHistory />
                   </ProtectedRoute>
                 }
@@ -131,7 +97,7 @@ function App() {
               <Route
                 path="/liked-videos"
                 element={
-                  <ProtectedRoute isLoggedIn={isLoggedIn}>
+                  <ProtectedRoute>
                     <LikedVideos />
                   </ProtectedRoute>
                 }
@@ -144,15 +110,10 @@ function App() {
                   isLoggedIn ? (
                     <Navigate to="/" />
                   ) : (
-                    <LoginPage
-                      setIsLoggedIn={setIsLoggedIn}
-                      setUser={setUser}
-                    />
+                    <LoginPage />
                   )
                 }
               />
-              <Route path="/tweets" element={<TweetFeedPage />} />
-
               <Route path="/register" element={<RegisterPage />} />
 
               {/* 404 */}

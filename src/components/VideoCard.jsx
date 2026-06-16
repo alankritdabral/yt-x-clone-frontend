@@ -3,62 +3,48 @@ import { useState } from "react";
 
 const API = import.meta.env.VITE_API_BASE_URL || "";
 
+const timeAgo = (date) => {
+  const seconds = Math.floor((Date.now() - new Date(date)) / 1000);
+
+  const intervals = [
+    { label: "year", seconds: 31536000 },
+    { label: "month", seconds: 2592000 },
+    { label: "day", seconds: 86400 },
+    { label: "hour", seconds: 3600 },
+    { label: "minute", seconds: 60 },
+  ];
+
+  for (const i of intervals) {
+    const count = Math.floor(seconds / i.seconds);
+    if (count >= 1) return `${count} ${i.label}${count > 1 ? "s" : ""} ago`;
+  }
+  return "just now";
+};
+
+const getThumbnailUrl = (video) => {
+  if (!video?.thumbnail) return "https://via.placeholder.com/320x180";
+  if (video.thumbnail.startsWith("http")) return video.thumbnail;
+  return `${API}${video.thumbnail}`;
+};
+
+const getAvatarUrl = (video) => {
+  if (!video?.owner?.avatar) return "https://via.placeholder.com/40";
+  if (video.owner.avatar.startsWith("http")) return video.owner.avatar;
+  return `${API}/${video.owner.avatar}`;
+};
+
+const formatViews = (views = 0) => {
+  if (views >= 1_000_000) return `${(views / 1_000_000).toFixed(1)}M`;
+  if (views >= 1_000) return `${(views / 1_000).toFixed(1)}K`;
+  return views;
+};
+
 const VideoCard = ({ video }) => {
   const navigate = useNavigate();
 
   const [showPlaylistPopup, setShowPlaylistPopup] = useState(false);
   const [playlists, setPlaylists] = useState([]);
   const [newPlaylistName, setNewPlaylistName] = useState("");
-
-  /* ---------- Helpers ---------- */
-  const getThumbnailUrl = () => {
-    if (!video?.thumbnail)
-      return "https://via.placeholder.com/320x180";
-
-    if (video.thumbnail.startsWith("http"))
-      return video.thumbnail;
-
-    return `${API}${video.thumbnail}`;
-  };
-
-  const getAvatarUrl = () => {
-    if (!video?.owner?.avatar)
-      return "https://via.placeholder.com/40";
-
-    if (video.owner.avatar.startsWith("http"))
-      return video.owner.avatar;
-
-    return `${API}/${video.owner.avatar}`;
-  };
-
-  const formatViews = (views = 0) => {
-    if (views >= 1_000_000)
-      return `${(views / 1_000_000).toFixed(1)}M`;
-    if (views >= 1_000)
-      return `${(views / 1_000).toFixed(1)}K`;
-    return views;
-  };
-
-  const timeAgo = (date) => {
-    const seconds = Math.floor(
-      (Date.now() - new Date(date)) / 1000
-    );
-
-    const intervals = [
-      { label: "year", seconds: 31536000 },
-      { label: "month", seconds: 2592000 },
-      { label: "day", seconds: 86400 },
-      { label: "hour", seconds: 3600 },
-      { label: "minute", seconds: 60 },
-    ];
-
-    for (const i of intervals) {
-      const count = Math.floor(seconds / i.seconds);
-      if (count >= 1)
-        return `${count} ${i.label}${count > 1 ? "s" : ""} ago`;
-    }
-    return "just now";
-  };
 
   const handleClick = () => {
     navigate(`/watch/${video?._id}`);
@@ -135,12 +121,12 @@ const VideoCard = ({ video }) => {
     <>
       <div
         onClick={handleClick}
-        className="cursor-pointer group"
+        className="cursor-pointer group flex flex-col gap-3"
       >
         {/* Thumbnail */}
-        <div className="relative rounded-xl overflow-hidden bg-[#202020] aspect-video">
+        <div className="relative rounded-2xl overflow-hidden bg-[#202020] aspect-video">
           <img
-            src={getThumbnailUrl()}
+            src={getThumbnailUrl(video)}
             alt={video?.title}
             loading="lazy"
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
@@ -152,42 +138,46 @@ const VideoCard = ({ video }) => {
             className="
               absolute top-2 right-2
               bg-black/70 hover:bg-black/90
-              text-white px-2 py-1 rounded
+              text-white px-2.5 py-1.5 rounded-lg
               opacity-0 group-hover:opacity-100
-              transition
+              backdrop-blur-sm
+              transition-all duration-200
             "
+            title="Add to Playlist"
           >
-            ➕
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-list-plus"><path d="M11 12H3"/><path d="M16 6H3"/><path d="M16 18H3"/><path d="M18 9v6"/><path d="M21 12h-6"/></svg>
           </button>
 
           {video?.duration && (
-            <span className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-1.5 py-0.5 rounded">
+            <span className="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-medium px-1.5 py-0.5 rounded-md backdrop-blur-sm">
               {Number(video.duration).toFixed(2)}
             </span>
           )}
         </div>
 
         {/* Info */}
-        <div className="mt-3 flex gap-3">
+        <div className="flex gap-3 items-start">
           <img
-            src={getAvatarUrl()}
+            src={getAvatarUrl(video)}
             alt={video?.owner?.username}
-            className="w-9 h-9 rounded-full object-cover shrink-0"
+            className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5 border border-transparent hover:border-gray-600 transition-colors"
           />
 
           <div className="flex flex-col flex-1">
-            <h3 className="text-sm font-medium leading-snug line-clamp-2 text-white">
+            <h3 className="text-[15px] font-semibold leading-tight line-clamp-2 text-[#f1f1f1] group-hover:text-white transition-colors">
               {video?.title}
             </h3>
 
-            <p className="text-xs text-gray-400 mt-1">
-              {video?.owner?.username}
-            </p>
+            <div className="mt-1 text-sm text-[#aaaaaa]">
+              <p className="hover:text-white transition-colors cursor-pointer w-max">
+                {video?.owner?.username}
+              </p>
 
-            <div className="text-xs text-gray-500 flex items-center gap-1">
-              <span>{formatViews(video?.views)} views</span>
-              <span>•</span>
-              <span>{timeAgo(video?.createdAt)}</span>
+              <div className="flex items-center gap-1.5 text-[13px] mt-0.5">
+                <span>{formatViews(video?.views)} views</span>
+                <span className="text-[10px]">•</span>
+                <span>{timeAgo(video?.createdAt)}</span>
+              </div>
             </div>
           </div>
         </div>

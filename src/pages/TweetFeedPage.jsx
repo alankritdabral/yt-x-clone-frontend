@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchFeedTweets } from "../api/tweetAPI";
 import TweetCard from "../components/TweetCard";
@@ -9,7 +9,7 @@ const TweetFeedPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const loadTweets = async () => {
+  const loadTweets = useCallback(async () => {
     try {
       setLoading(true);
       const data = await fetchFeedTweets();
@@ -20,11 +20,11 @@ const TweetFeedPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
 
   useEffect(() => {
     loadTweets();
-  }, []);
+  }, [loadTweets]);
 
   return (
     <div className="pt-4">

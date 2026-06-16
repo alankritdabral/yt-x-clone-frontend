@@ -1,45 +1,21 @@
-const API = import.meta.env.VITE_API_BASE_URL;
+import apiClient from "./axiosClient";
 
 /* -------- Get All Videos -------- */
 export const fetchVideos = async () => {
-  const response = await fetch(`${API}/videos`, {
-    method: "GET",
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text);
-  }
-
-  return response.json();
+  const response = await apiClient.get("/videos");
+  return response.data;
 };
 
 /* -------- Get Liked Videos -------- */
 export const fetchLikedVideos = async () => {
-  const response = await fetch(`${API}/likes/videos`, {
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text);
-  }
-
-  return response.json();
+  const response = await apiClient.get("/likes/videos");
+  return response.data;
 };
 
 /* ---------- Videos by Owner ---------- */
 export const fetchVideosByOwner = async (ownerId) => {
-  const res = await fetch(`${API}/videos`, {
-    credentials: "include",
-  });
-
-  if (!res.ok) throw new Error("Failed videos");
-
-  const result = await res.json();
-  const allVideos = result.data.videos || [];
-
+  const response = await apiClient.get("/videos");
+  const allVideos = response.data.data.videos || [];
   return allVideos.filter((v) => v.owner?._id === ownerId);
 };
 
@@ -49,67 +25,42 @@ export const uploadVideo = ({
   onProgress,
   onSuccess,
   onError,
-  xhrRef,
+  abortController,
 }) => {
-  const xhr = new XMLHttpRequest();
-  xhrRef.current = xhr;
-
-  xhr.open("POST", `${API}/videos/`);
-  xhr.withCredentials = true;
-
-  const startTime = Date.now();
-
-  xhr.upload.onprogress = (e) => {
-    if (!e.lengthComputable) return;
-
-    const percent = Math.round((e.loaded * 100) / e.total);
-    onProgress(percent);
-
-    const seconds = (Date.now() - startTime) / 1000;
-    const speed = (e.loaded / 1024 / 1024 / seconds).toFixed(2);
-    console.log(`${speed} MB/s`);
-  };
-
-  xhr.onload = () => {
-    if (xhr.status === 201) {
-      onSuccess();
-    } else {
-      onError();
+  // Using axios for upload to benefit from progress events and interceptors
+  return apiClient.post("/videos/", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+    signal: abortController?.signal,
+    onUploadProgress: (progressEvent) => {
+      if (onProgress) {
+        const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        onProgress(percent);
+      }
     }
-  };
-
-  xhr.onerror = onError;
-
-  xhr.send(formData);
+  })
+  .then(onSuccess)
+  .catch((error) => {
+    if (error.name === 'CanceledError') {
+      console.log('Upload cancelled');
+    } else {
+      onError(error);
+    }
+  });
 };
 
 /* ---------- Register View ---------- */
 export const registerView = async (videoId) => {
-  await fetch(`${API}/videos/view/${videoId}`, {
-    method: "POST",
-    credentials: "include",
-  });
+  return apiClient.post(`/videos/view/${videoId}`);
 };
 
 /* ---------- Toggle Like ---------- */
 export const toggleVideoLike = async (videoId) => {
-  const res = await fetch(`${API}/likes/toggle/v/${videoId}`, {
-    method: "POST",
-    credentials: "include",
-  });
-
-  const data = await res.json();
-  return data.data;
+  const response = await apiClient.post(`/likes/toggle/v/${videoId}`);
+  return response.data.data;
 };
 
 /* ---------- Get Video ---------- */
 export const fetchVideo = async (videoId) => {
-  const res = await fetch(`${API}/videos/${videoId}`, {
-    credentials: "include",
-  });
-
-  if (!res.ok) throw new Error("Video fetch failed");
-
-  const data = await res.json();
-  return data.data;
+  const response = await apiClient.get(`/videos/${videoId}`);
+  return response.data.data;
 };

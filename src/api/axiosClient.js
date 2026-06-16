@@ -1,13 +1,14 @@
 // API configuration and instance setup
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1/'
 const API_TIMEOUT = import.meta.env.VITE_API_TIMEOUT || 10000
 
 // Create axios instance with default config
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: API_TIMEOUT,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -28,29 +29,66 @@ apiClient.interceptors.request.use(
 )
 
 // Response interceptor - Handle token refresh and errors
+let refreshTokenPromise = null;
+
+export const refreshAccessToken = async () => {
+  if (refreshTokenPromise) return refreshTokenPromise;
+
+  refreshTokenPromise = (async () => {
+    try {
+      const url = `${API_BASE_URL.replace(/\/$/, '')}/users/refresh-token`;
+      
+      const response = await axios.post(
+        url,
+        {},
+        { withCredentials: true }
+      );
+      const { accessToken, user } = response.data.data;
+      
+      localStorage.setItem("accessToken", accessToken);
+      if (user) {
+        localStorage.setItem("user", JSON.stringify(user));
+      }
+      
+      apiClient.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+      return { accessToken, user };
+    } catch (error) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+      if (window.location.pathname !== "/login" && window.location.pathname !== "/register") {
+        window.location.href = "/login";
+      }
+      throw error;
+    } finally {
+      refreshTokenPromise = null;
+    }
+  })();
+
+  return refreshTokenPromise;
+};
+
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config
+    const originalRequest = error.config;
 
-    // TODO: Handle token refresh on 401
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true
+    if (
+      error.response?.status === 401 && 
+      !originalRequest._retry && 
+      !originalRequest.url.includes('refresh-token')
+    ) {
+      originalRequest._retry = true;
       try {
-        // TODO: Call refresh token endpoint
-        // const response = await apiClient.post('/users/refresh-token')
-        // localStorage.setItem('accessToken', response.data.data.accessToken)
-        // return apiClient(originalRequest)
+        const { accessToken } = await refreshAccessToken();
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        return apiClient(originalRequest);
       } catch (refreshError) {
-        // TODO: Redirect to login if refresh fails
-        localStorage.removeItem('accessToken')
-        window.location.href = '/login'
-        return Promise.reject(refreshError)
+        return Promise.reject(refreshError);
       }
     }
 
-    return Promise.reject(error)
+    return Promise.reject(error);
   }
-)
+);
 
 export default apiClient

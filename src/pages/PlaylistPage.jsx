@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import VideoCard from "../components/VideoCard";
 import {
   fetchUserPlaylists,
@@ -14,8 +14,18 @@ const PlaylistPage = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
 
+  /* ---------- Playlist Details ---------- */
+  const loadPlaylistDetails = useCallback(async (playlistId) => {
+    try {
+      const data = await fetchPlaylistDetails(playlistId);
+      setSelectedPlaylist(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }, []);
+
   /* ---------- Load Playlists ---------- */
-  const loadPlaylists = async () => {
+  const loadPlaylists = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -35,21 +45,11 @@ const PlaylistPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [loadPlaylistDetails]);
 
   useEffect(() => {
     loadPlaylists();
-  }, []);
-
-  /* ---------- Playlist Details ---------- */
-  const loadPlaylistDetails = async (playlistId) => {
-    try {
-      const data = await fetchPlaylistDetails(playlistId);
-      setSelectedPlaylist(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  }, [loadPlaylists]);
 
   /* ---------- Create Playlist ---------- */
   const handleCreatePlaylist = async () => {

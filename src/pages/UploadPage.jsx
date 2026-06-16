@@ -16,7 +16,7 @@ const UploadPage = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  const xhrRef = useRef(null);
+  const abortControllerRef = useRef(null);
   const videoInputRef = useRef(null);
 
   /* ---------------- CLEANUP ---------------- */
@@ -102,8 +102,8 @@ const UploadPage = () => {
 
   /* ---------------- CANCEL UPLOAD ---------------- */
   const cancelUpload = () => {
-    if (xhrRef.current) {
-      xhrRef.current.abort();
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
     }
     setUploading(false);
     setUploadProgress(0);
@@ -136,10 +136,11 @@ const UploadPage = () => {
     });
 
     setUploading(true);
+    abortControllerRef.current = new AbortController();
 
     uploadVideo({
       formData: data,
-      xhrRef,
+      abortController: abortControllerRef.current,
       onProgress: setUploadProgress,
       onSuccess: () => {
         setUploading(false);

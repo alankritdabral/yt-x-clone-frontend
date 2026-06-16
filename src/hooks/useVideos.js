@@ -1,5 +1,5 @@
 // Custom hook for fetching videos
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import videoAPI from '../api/videoAPI'
 import { handleAPIError } from '../utils/errorHandler'
 

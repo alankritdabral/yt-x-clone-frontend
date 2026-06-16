@@ -26,16 +26,22 @@ const HomePage = () => {
   }, [navigate]);
 
   return (
-    <div className="pt-4">
-      <div className="px-4 md:px-6 py-4 max-w-[1800px] w-full">
+    <div className="pt-2 md:pt-4">
+      <div className="px-4 md:px-6 py-4 max-w-[2000px] w-full mx-auto">
         {loading ? (
           /* ---------- Skeleton Loader ---------- */
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          <div className="grid gap-x-4 gap-y-10 sm:gap-x-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
             {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="aspect-video bg-[#2a2a2a] rounded-xl" />
-                <div className="mt-3 h-4 bg-[#2a2a2a] rounded w-3/4" />
-                <div className="mt-2 h-3 bg-[#242424] rounded w-1/2" />
+              <div key={i} className="animate-pulse flex flex-col gap-3">
+                <div className="aspect-video bg-[#202020] rounded-2xl w-full" />
+                <div className="flex gap-3 items-start">
+                  <div className="w-9 h-9 bg-[#202020] rounded-full shrink-0 mt-0.5" />
+                  <div className="flex flex-col gap-2 w-full">
+                    <div className="h-4 bg-[#202020] rounded w-[90%]" />
+                    <div className="h-4 bg-[#202020] rounded w-[60%]" />
+                    <div className="h-3 bg-[#202020] rounded w-[40%] mt-1" />
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -43,14 +49,15 @@ const HomePage = () => {
           /* ---------- Video Grid ---------- */
           <div
             className="
-    grid gap-8
-    grid-cols-1
-    sm:grid-cols-2
-    md:grid-cols-3
-    lg:grid-cols-4
-    xl:grid-cols-4
-    2xl:grid-cols-4
-  "
+              grid gap-x-4 gap-y-10
+              sm:gap-x-6
+              grid-cols-1
+              sm:grid-cols-2
+              md:grid-cols-3
+              lg:grid-cols-4
+              xl:grid-cols-5
+              2xl:grid-cols-6
+            "
           >
             {videos.map((video) => (
               <VideoCard key={video._id} video={video} />
@@ -58,6 +65,7 @@ const HomePage = () => {
           </div>
 
         ) : (
+
           /* ---------- Empty State ---------- */
           <div className="flex flex-col items-center justify-center py-20 text-gray-400">
             <p className="text-lg mb-2">No videos found</p>

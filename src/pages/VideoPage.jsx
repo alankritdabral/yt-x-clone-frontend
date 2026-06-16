@@ -15,7 +15,7 @@ import {
 const API = import.meta.env.VITE_API_BASE_URL || "";
 const requireLogin = () => {
   const user = localStorage.getItem("user");
-
+ 
   if (!user) {
     alert("Please login to continue");
     return false;
@@ -42,7 +42,6 @@ const VideoPage = () => {
 
   const [showPlaylistPopup, setShowPlaylistPopup] = useState(false);
   const [playlists, setPlaylists] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
 
   /* ---------------- Fetch Data ---------------- */
@@ -50,7 +49,7 @@ const VideoPage = () => {
     const fetchData = async () => {
       try {
         const storedUser = localStorage.getItem("user");
-        if (!storedUser) setIsLoggedIn(false);
+        const userLoggedIn = !!storedUser;
 
         const videoInfo = await fetchVideo(videoId);
 
@@ -70,7 +69,7 @@ const VideoPage = () => {
         }
 
         setComments(await fetchComments(videoId));
-        if (isLoggedIn) {
+        if (userLoggedIn) {
           await fetch(`${API}/users/history/${videoId}`, {
             method: "POST",
             credentials: "include",
@@ -122,16 +121,12 @@ const VideoPage = () => {
   const toggleLike = async () => {
     if (!requireLogin()) return;
 
-    const prev = liked;
-    setLiked(!prev);
-    setLikesCount((c) => (prev ? Math.max(c - 1, 0) : c + 1));
-
     try {
       const data = await toggleVideoLike(videoId);
       setLiked(data.liked);
       setLikesCount(data.likesCount);
-    } catch {
-      setLiked(prev);
+    } catch (err) {
+      console.error("Video like toggle failed:", err);
     }
   };
 
@@ -140,20 +135,18 @@ const VideoPage = () => {
     if (!requireLogin()) return;
     if (!video?.owner?._id) return;
 
-    const prev = subscribed;
-
-    setSubscribed(!prev);
-    setSubscribersCount((c) =>
-      prev ? Math.max(c - 1, 0) : c + 1
-    );
-
     try {
-      await fetch(
+      const res = await fetch(
         `${API}/subscriptions/c/${video.owner._id}`,
         { method: "POST", credentials: "include" }
       );
-    } catch {
-      setSubscribed(prev);
+      
+      if (res.ok) {
+        setSubscribed((prev) => !prev);
+        setSubscribersCount((c) => (subscribed ? Math.max(c - 1, 0) : c + 1));
+      }
+    } catch (err) {
+      console.error("Subscription toggle failed:", err);
     }
   };
 
@@ -179,24 +172,30 @@ const VideoPage = () => {
   const toggleCommentLike = async (id) => {
     if (!requireLogin()) return;
 
-    setComments((prev) =>
-      prev.map((c) =>
-        c._id === id
-          ? {
-            ...c,
-            isLiked: !c.isLiked,
-            likesCount: c.isLiked
-              ? Math.max((c.likesCount || 1) - 1, 0)
-              : (c.likesCount || 0) + 1,
-          }
-          : c
-      )
-    );
+    try {
+      const res = await fetch(`${API}/likes/toggle/c/${id}`, {
+        method: "POST",
+        credentials: "include",
+      });
 
-    await fetch(`${API}/likes/toggle/c/${id}`, {
-      method: "POST",
-      credentials: "include",
-    });
+      if (res.ok) {
+        setComments((prev) =>
+          prev.map((c) =>
+            c._id === id
+              ? {
+                ...c,
+                isLiked: !c.isLiked,
+                likesCount: c.isLiked
+                  ? Math.max((c.likesCount || 1) - 1, 0)
+                  : (c.likesCount || 0) + 1,
+              }
+              : c
+          )
+        );
+      }
+    } catch (err) {
+      console.error("Comment like toggle failed:", err);
+    }
   };
 
 
@@ -258,7 +257,7 @@ const VideoPage = () => {
         <div className="flex gap-3">
           <button
             onClick={toggleLike}
-            className="px-4 py-2 bg-[#2a2a2a] hover:bg-[#3a3a3a] rounded-full"
+            className={`px-4 py-2 bg-[#2a2a2a] hover:bg-[#3a3a3a] rounded-full transition ${liked ? "text-blue-500 border border-blue-500/30" : ""}`}
           >
             👍 {likesCount}
           </button>
@@ -334,7 +333,10 @@ const VideoPage = () => {
               <p className="text-gray-300">{c.content}</p>
 
               <div className="flex gap-4 mt-1 text-sm text-gray-400">
-                <button onClick={() => toggleCommentLike(c._id)}>
+                <button
+                  onClick={() => toggleCommentLike(c._id)}
+                  className={c.isLiked ? "text-blue-500" : ""}
+                >
                   👍 {c.likesCount || 0}
                 </button>
 

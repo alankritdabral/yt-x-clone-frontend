@@ -1,8 +1,7 @@
-// src/components/Navbar.jsx
 import { Menu, Search, Video, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { logoutUser } from "../api/userAPI";
+import { useAuth } from "../hooks/useAuth";
 
 /* Use VITE env for production builds */
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
@@ -10,10 +9,8 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
 const Navbar = ({
   sidebarOpen,
   setSidebarOpen,
-  user,
-  setUser,
-  setIsLoggedIn,
 }) => {
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [searchText, setSearchText] = useState("");
 
@@ -33,18 +30,9 @@ const Navbar = ({
   /* ======================
      Logout Handler
   ====================== */
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    setUser(null);
-    setIsLoggedIn(false);
-
-    logoutUser()
-      .then(() => {
-        navigate("/login");
-      })
-      .catch((error) => {
-        console.error("Logout error:", error);
-      });
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
   };
 
   /* ======================
@@ -63,30 +51,30 @@ const Navbar = ({
     <nav
       className="
         fixed top-0 left-0 right-0 z-50 h-14
-        bg-[#0f0f0f]/95 backdrop-blur
-        border-b border-[#2a2a2a]
+        bg-[#0f0f0f]/95 backdrop-blur-md
+        border-b border-[#2a2a2a]/50
       "
     >
-      <div className="flex items-center justify-between h-full px-3 md:px-4">
+      <div className="flex items-center justify-between h-full px-3 md:px-5">
         {/* LEFT */}
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-3 md:gap-5">
           <button
             aria-label="Toggle sidebar"
-            className="p-2 rounded-full hover:bg-[#242424] transition"
+            className="p-2.5 rounded-full hover:bg-[#272727] transition-colors"
             onClick={() => setSidebarOpen(!sidebarOpen)}
           >
-            <Menu size={22} className="text-gray-300" />
+            <Menu size={20} className="text-[#f1f1f1]" strokeWidth={2} />
           </button>
 
           <Link
             to="/"
-            className="p-1 rounded-md hover:bg-[#242424] transition"
+            className="flex items-center gap-1 rounded-md transition-opacity hover:opacity-80"
           >
             <svg
-              width="40"
+              width="32"
               viewBox="0 0 512 320"
               xmlns="http://www.w3.org/2000/svg"
-              className="h-8"
+              className="h-6"
             >
               <rect
                 x="56"
@@ -115,77 +103,80 @@ const Navbar = ({
                 strokeLinecap="round"
               />
             </svg>
+            <span className="text-xl font-semibold tracking-tighter text-white ml-0.5">YT-X</span>
           </Link>
         </div>
 
         {/* CENTER SEARCH */}
-        <div className="hidden sm:flex items-center flex-1 max-w-xl mx-4">
-          <div className="flex w-full">
-            <input
-              type="text"
-              placeholder="Search videos"
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="
-                w-full px-4 py-2
-                bg-[#202020]
-                border border-[#2a2a2a]
-                rounded-l-full
-                text-white placeholder-gray-500
-                focus:outline-none focus:border-red-600
-              "
-            />
-
+        <div className="hidden sm:flex items-center flex-1 max-w-2xl mx-6">
+          <div className="flex w-full group">
+            <div className="flex w-full rounded-l-full border border-[#303030] bg-[#121212] overflow-hidden focus-within:border-[#1c62b9] focus-within:ml-0 transition-colors ml-0">
+               {/* Optional Search icon that appears on focus could go here, omitting for simplicity */}
+              <input
+                type="text"
+                placeholder="Search"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="
+                  w-full px-5 py-2.5
+                  bg-transparent
+                  text-[15px] text-white placeholder-gray-400
+                  focus:outline-none
+                "
+              />
+            </div>
             <button
               onClick={handleSearch}
               aria-label="Search"
               className="
-                px-5
-                border border-l-0 border-[#2a2a2a]
+                px-5 py-2.5
+                border border-l-0 border-[#303030]
                 rounded-r-full
-                bg-[#242424]
-                hover:bg-[#2f2f2f]
-                transition
+                bg-[#222222]
+                hover:bg-[#303030]
+                transition-colors
+                flex items-center justify-center
               "
             >
-              <Search size={20} className="text-gray-300" />
+              <Search size={19} className="text-[#f1f1f1]" strokeWidth={2} />
             </button>
           </div>
         </div>
 
         {/* RIGHT */}
-        <div className="flex items-center gap-1 md:gap-3">
+        <div className="flex items-center gap-2 md:gap-4">
           {/* Mobile search */}
           <button
             onClick={handleSearch}
-            className="sm:hidden p-2 rounded-full hover:bg-[#242424]"
+            className="sm:hidden p-2.5 rounded-full hover:bg-[#272727] transition-colors"
           >
-            <Search size={20} className="text-gray-300" />
+            <Search size={20} className="text-[#f1f1f1]" strokeWidth={2} />
           </button>
 
           {/* Upload */}
           <Link
             to="/upload"
-            className="p-2 rounded-full hover:bg-[#242424] transition"
+            className="p-2.5 rounded-full hover:bg-[#272727] transition-colors"
             aria-label="Upload video"
           >
-            <Video size={22} className="text-gray-300" />
+            <Video size={20} className="text-[#f1f1f1]" strokeWidth={2} />
           </Link>
 
           {/* Sign in / Sign out */}
           {user ? (
             <button
               onClick={handleLogout}
-              className="px-3 py-1 text-sm rounded-md bg-[#242424] hover:bg-[#2f2f2f] transition"
+              className="px-3.5 py-1.5 text-[14px] font-medium rounded-full border border-[#303030] hover:bg-[#272727] transition-colors"
             >
               Sign out
             </button>
           ) : (
             <Link
               to="/login"
-              className="px-3 py-1 text-sm rounded-md bg-[#242424] hover:bg-[#2f2f2f] transition"
+              className="px-3.5 py-1.5 text-[14px] font-medium text-blue-400 border border-[#303030] rounded-full hover:bg-[#263850]/40 hover:border-transparent transition-colors flex items-center gap-2"
             >
+              <User size={16} />
               Sign in
             </Link>
           )}
@@ -198,21 +189,20 @@ const Navbar = ({
                 alt="avatar"
                 className="
                   w-8 h-8 rounded-full object-cover
-                  border border-[#2a2a2a]
-                  hover:border-red-600 transition
+                  hover:ring-1 hover:ring-offset-1 hover:ring-offset-[#0f0f0f] hover:ring-white transition-all
                 "
               />
             ) : (
               <div
                 className="
                   w-8 h-8 rounded-full
-                  bg-[#202020]
-                  border border-[#2a2a2a]
-                  text-gray-300
+                  bg-[#272727]
+                  text-white
                   flex items-center justify-center
+                  hover:bg-[#303030] transition-colors
                 "
               >
-                <User size={18} />
+                <User size={16} />
               </div>
             )}
           </Link>

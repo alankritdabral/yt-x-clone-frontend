@@ -1,87 +1,33 @@
-const API = import.meta.env.VITE_API_BASE_URL;
+import apiClient from "./axiosClient";
 
 /* -------- Login User -------- */
 export const loginUser = async (email, password) => {
-  const response = await fetch(`${API}/users/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ email, password }),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => null);
-    throw new Error(errorData?.message || "Login failed");
-  }
-
-  return response.json();
+  const response = await apiClient.post("/users/login", { email, password });
+  return response.data;
 };
 
 /* -------- Logout User -------- */
 export const logoutUser = async () => {
-  const response = await fetch(`${API}/users/logout`, {
-    method: "POST",
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => null);
-    throw new Error(errorData?.message || "Logout failed");
-  }
-
-  return response.json();
+  const response = await apiClient.post("/users/logout");
+  return response.data;
 };
 
 /* ---------- Register ---------- */
 export const registerUser = async (formData) => {
-  const response = await fetch(`${API}/users/register`, {
-    method: "POST",
-    body: formData,
+  const response = await apiClient.post("/users/register", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
   });
-
-  const result = await response.json();
-
-  if (!response.ok) {
-    throw new Error(result.message || "Registration failed");
-  }
-
-  return result;
+  return response.data;
 };
 
 /* ---------- Current User ---------- */
 export const fetchCurrentUser = async () => {
-  const res = await fetch(`${API}/users/current-user`, {
-    credentials: "include",
-  });
-
-  if (!res.ok) throw new Error("Failed to fetch user");
-
-  const data = await res.json();
-  return data.data;
+  const response = await apiClient.get("/users/current-user");
+  return response.data.data;
 };
 
 /* ---------- Watch History ---------- */
 export const fetchWatchHistory = async () => {
-  const res = await fetch(`${API}/users/history`, {
-    credentials: "include",
-  });
-
-  if (!res.ok) throw new Error("Failed history");
-
-  const data = await res.json();
-  return data.data || [];
-};
-
-/* ---------- Videos by Owner ---------- */
-export const fetchVideosByOwner = async (ownerId) => {
-  const res = await fetch(`${API}/videos`, {
-    credentials: "include",
-  });
-
-  if (!res.ok) throw new Error("Failed videos");
-
-  const result = await res.json();
-  const allVideos = result.data.videos || [];
-
-  return allVideos.filter((v) => v.owner?._id === ownerId);
+  const response = await apiClient.get("/users/history");
+  return response.data.data || [];
 };

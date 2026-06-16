@@ -18,22 +18,23 @@ const sidebarItems = [
   { label: "Messages", icon: MessageSquare, path: "/tweets" },
 ];
 
+// eslint-disable-next-line no-unused-vars
 const SidebarItem = ({ icon: Icon, label, active, onClick, sidebarOpen }) => (
   <div
     onClick={onClick}
     className={`
-      flex items-center gap-4 px-4 py-2 mx-2 rounded-lg cursor-pointer
-      transition-colors
+      flex items-center gap-4 px-4 py-2.5 mx-2 rounded-xl cursor-pointer
+      transition-all duration-200
       ${active
-        ? "bg-[#242424] text-white font-medium"
-        : "text-gray-400 hover:bg-[#242424] hover:text-white"
+        ? "bg-[#272727] text-white font-medium"
+        : "text-[#f1f1f1] hover:bg-[#272727] hover:text-white"
       }
     `}
   >
-    <Icon size={22} />
+    <Icon size={22} strokeWidth={active ? 2.5 : 2} className={active ? "text-white" : "text-[#aaaaaa]"} />
 
     {sidebarOpen && (
-      <span className="text-sm whitespace-nowrap">{label}</span>
+      <span className="text-[15px] whitespace-nowrap">{label}</span>
     )}
   </div>
 );
@@ -55,10 +56,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         className={`
     fixed top-14 left-0 h-[calc(100vh-56px)]
     bg-[#0f0f0f]
-    border-r border-[#2a2a2a]
     transition-all duration-300 z-40
+    overflow-y-auto custom-scrollbar
 
-    w-56
+    w-60
     transform
 
     /* Mobile slide */
@@ -66,7 +67,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
     /* Desktop behavior */
     md:translate-x-0
-    ${sidebarOpen ? "md:w-56" : "md:w-20"}
+    ${sidebarOpen ? "md:w-60" : "md:w-[72px]"}
   `}
       >
         <div className="py-3 space-y-1">

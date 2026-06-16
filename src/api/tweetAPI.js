@@ -1,91 +1,45 @@
-// src/api/tweetAPI.js
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
-
-/* ===========================
-   Helper: Auth Headers
-=========================== */
-const getAuthHeaders = () => {
-  const token = localStorage.getItem("accessToken");
-
-  return {
-    "Content-Type": "application/json",
-    Authorization: token ? `Bearer ${token}` : "",
-  };
-};
-
-/* ===========================
-   Helper: Handle Response
-=========================== */
-const handleResponse = async (res) => {
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data?.message || "Something went wrong");
-  }
-
-  return data;
-};
+import apiClient from "./axiosClient";
 
 /* ===========================
    Create Tweet
 =========================== */
 export const createTweet = async (content) => {
-  const res = await fetch(`${API_BASE}/tweets`, {
-    method: "POST",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ content }),
-  });
-
-  return handleResponse(res);
+  const response = await apiClient.post("/tweets", { content });
+  return response.data;
 };
 
 /* ===========================
    Get Feed Tweets
 =========================== */
 export const fetchFeedTweets = async (page = 1, limit = 10) => {
-  const res = await fetch(`${API_BASE}/tweets?page=${page}&limit=${limit}`, {
-    headers: getAuthHeaders(),
+  const response = await apiClient.get("/tweets", {
+    params: { page, limit }
   });
-
-  return handleResponse(res);
+  return response.data;
 };
 
 /* ===========================
    Get User Tweets
 =========================== */
 export const fetchUserTweets = async (userId, page = 1, limit = 10) => {
-  const res = await fetch(
-    `${API_BASE}/tweets/user/${userId}?page=${page}&limit=${limit}`,
-    {
-      headers: getAuthHeaders(),
-    }
-  );
-
-  return handleResponse(res);
+  const response = await apiClient.get(`/tweets/user/${userId}`, {
+    params: { page, limit }
+  });
+  return response.data;
 };
 
 /* ===========================
    Update Tweet
 =========================== */
 export const updateTweet = async (tweetId, content) => {
-  const res = await fetch(`${API_BASE}/tweets/${tweetId}`, {
-    method: "PATCH",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ content }),
-  });
-
-  return handleResponse(res);
+  const response = await apiClient.patch(`/tweets/${tweetId}`, { content });
+  return response.data;
 };
 
 /* ===========================
    Delete Tweet
 =========================== */
 export const deleteTweet = async (tweetId) => {
-  const res = await fetch(`${API_BASE}/tweets/${tweetId}`, {
-    method: "DELETE",
-    headers: getAuthHeaders(),
-  });
-
-  return handleResponse(res);
+  const response = await apiClient.delete(`/tweets/${tweetId}`);
+  return response.data;
 };

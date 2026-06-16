@@ -1,32 +1,18 @@
-const API = import.meta.env.VITE_API_BASE_URL;
+import apiClient from "./axiosClient";
 
 /* ---------- Get Comments ---------- */
 export const fetchComments = async (videoId) => {
-  const res = await fetch(`${API}/comments/${videoId}`, {
-    credentials: "include",
-  });
-
-  const data = await res.json();
-  return data.data?.comments || [];
+  const response = await apiClient.get(`/comments/${videoId}`);
+  return response.data.data?.comments || [];
 };
 
 /* ---------- Add Comment ---------- */
 export const createComment = async (videoId, content) => {
-  const res = await fetch(`${API}/comments/${videoId}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ content }),
-  });
-
-  const data = await res.json();
-  return data.data;
+  const response = await apiClient.post(`/comments/${videoId}`, { content });
+  return response.data.data;
 };
 
 /* ---------- Delete Comment ---------- */
 export const removeComment = async (id) => {
-  await fetch(`${API}/comments/c/${id}`, {
-    method: "DELETE",
-    credentials: "include",
-  });
+  await apiClient.delete(`/comments/c/${id}`);
 };
